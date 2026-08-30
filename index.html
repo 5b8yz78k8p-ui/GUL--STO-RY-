@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GULÌSTORY</title>
+    <style>
+        body { font-family: 'Georgia', serif; background-color: #f0f7f0; color: #1e3a2f; margin: 0; padding: 20px; }
+        header { text-align: center; margin-bottom: 30px; }
+        h1 { color: #1e3a2f; letter-spacing: 3px; text-transform: uppercase; border-bottom: 2px solid #d4af37; display: inline-block; padding-bottom: 10px; }
+        .goods-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 25px; max-width: 1000px; margin: 0 auto; }
+        .card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); text-align: center; border: 2px solid transparent; transition: 0.3s; }
+        .card:hover { border-color: #d4af37; transform: translateY(-5px); }
+        .card img { max-width: 100%; border-radius: 8px; height: 200px; object-fit: cover; margin-bottom: 15px; }
+        .price { color: #d4af37; font-weight: bold; font-size: 1.3em; margin: 10px 0; }
+        .add-btn { background-color: #1e3a2f; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-size: 16px; width: 100%; }
+        .add-btn:hover { background-color: #d4af37; color: #1e3a2f; }
+        .cart-section { max-width: 1000px; margin: 40px auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
+        .cart-section h2 { color: #1e3a2f; border-bottom: 2px solid #d4af37; padding-bottom: 10px; }
+        .cart-item { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+        .total { font-size: 1.5em; font-weight: bold; color: #1e3a2f; text-align: right; margin-top: 20px; }
+        .whatsapp-btn { display: block; background-color: #25D366; color: white; text-decoration: none; padding: 15px; text-align: center; border-radius: 30px; font-size: 1.2em; margin-top: 20px; font-weight: bold; }
+        .whatsapp-btn:hover { background-color: #128C7E; }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>GULÌSTORY</h1>
+        <p>Элегантные товары для вас</p>
+    </header>
+
+    <div class="goods-grid">
+        
+        <!-- ТОВАР 1 -->
+        <div class="card">
+            <img src="https://i.postimg.cc/ydxcJbgS/image.jpg" alt="Фото товара">
+            <!-- Удали текст "" и напиши свою цифру (например 350) -->
+            <div class="price"><span class="price-value">1200</span> ₽</div>
+            <!-- В кнопке ВАЖНО: цифра после запятой должна быть ТОЧНО ТАКОЙ ЖЕ, как в цене выше -->
+            <button class="add-btn" onclick="addToCart('Товар 1',1200)">Добавить в корзину</button>
+        </div>
+
+        <!-- ТОВАР 2 -->
+        <div class="card">
+            <img src="ССЫЛКА_НА_ФОТО_2" alt="Фото товара">
+            <div class="price"><span class="price-value">ВСТАВЬ_ЦЕНУ</span> ₽</div>
+            <button class="add-btn" onclick="addToCart('Товар 2', ВСТАВЬ_ЦЕНУ)">Добавить в корзину</button>
+        </div>
+
+        <!-- ТОВАР 3 -->
+        <div class="card">
+            <img src="ССЫЛКА_НА_ФОТО_3" alt="Фото товара">
+            <div class="price"><span class="price-value">ВСТАВЬ_ЦЕНУ</span> ₽</div>
+            <button class="add-btn" onclick="addToCart('Товар 3', ВСТАВЬ_ЦЕНУ)">Добавить в корзину</button>
+        </div>
+
+        <!-- ТОВАР 4 -->
+        <div class="card">
+            <img src="ССЫЛКА_НА_ФОТО_4" alt="Фото товара">
+            <div class="price"><span class="price-value">ВСТАВЬ_ЦЕНУ</span> ₽</div>
+            <button class="add-btn" onclick="addToCart('Товар 4', ВСТАВЬ_ЦЕНУ)">Добавить в корзину</button>
+        </div>
+
+        <!-- ТОВАР 5 -->
+        <div class="card">
+            <img src="ССЫЛКА_НА_ФОТО_5" alt="Фото товара">
+            <div class="price"><span class="price-value">ВСТАВЬ_ЦЕНУ</span> ₽</div>
+            <button class="add-btn" onclick="addToCart('Товар 5', ВСТАВЬ_ЦЕНУ)">Добавить в корзину</button>
+        </div>
+
+        <!-- ТОВАР 6 -->
+        <div class="card">
+            <img src="ССЫЛКА_НА_ФОТО_6" alt="Фото товара">
+            <div class="price"><span class="price-value">ВСТАВЬ_ЦЕНУ</span> ₽</div>
+            <button class="add-btn" onclick="addToCart('Товар 6', ВСТАВЬ_ЦЕНУ)">Добавить в корзину</button>
+        </div>
+
+        <!-- ТОВАР 7 -->
+        <div class="card">
+            <img src="ССЫЛКА_НА_ФОТО_7" alt="Фото товара">
+            <div class="price"><span class="price-value">ВСТАВЬ_ЦЕНУ</span> ₽</div>
+            <button class="add-btn" onclick="addToCart('Товар 7', ВСТАВЬ_ЦЕНУ)">Добавить в корзину</button>
+        </div>
+
+        <!-- ТОВАР 8 -->
+        <div class="card">
+            <img src="ССЫЛКА_НА_ФОТО_8" alt="Фото товара">
+            <div class="price"><span class="price-value">ВСТАВЬ_ЦЕНУ</span> ₽</div>
+            <button class="add-btn" onclick="addToCart('Товар 8', ВСТАВЬ_ЦЕНУ)">Добавить в корзину</button>
+        </div>
+
+        <!-- ТОВАР 9 -->
+        <div class="card">
+            <img src="ССЫЛКА_НА_ФОТО_9" alt="Фото товара">
+            <div class="price"><span class="price-value">ВСТАВЬ_ЦЕНУ</span> ₽</div>
+            <button class="add-btn" onclick="addToCart('Товар 9', ВСТАВЬ_ЦЕНУ)">Добавить в корзину</button>
+        </div>
+
+        <!-- ТОВАР 10 -->
+        <div class="card">
+            <img src="ССЫЛКА_НА_ФОТО_10" alt="Фото товара">
+            <div class="price"><span class="price-value">ВСТАВЬ_ЦЕНУ</span> ₽</div>
+            <button class="add-btn" onclick="addToCart('Товар 10', ВСТАВЬ_ЦЕНУ)">Добавить в корзину</button>
+        </div>
+
+    </div>
+
+    <div class="cart-section">
+        <h2>🛒 Ваша корзина</h2>
+        <div id="cart-items"></div>
+        <div class="total">Итого: <span id="total-price">0</span> ₽</div>
+        
+        <a href="#" id="whatsapp-link" class="whatsapp-btn" target="_blank">Оформить в WhatsApp 📲</a>
+    </div>
+
+    <script>
+        let cart = [];
+
+        function addToCart(name, price) {
+            cart.push({ name, price });
+            updateCart();
+        }
+
+        function updateCart() {
+            const cartContainer = document.getElementById('cart-items');
+            const totalContainer = document.getElementById('total-price');
+            cartContainer.innerHTML = '';
+            let total = 0;
+            
+            cart.forEach((item, index) => {
+                total += item.price;
+                cartContainer.innerHTML += `
+                    <div class="cart-item">
+                        <span>${item.name}</span>
+                        <span>${item.price} ₽ 
+                            <button onclick="removeFromCart(${index})" style="background:red; color:white; border:none; border-radius:5px; cursor:pointer;">X</button>
+                        </span>
+                    </div>
+                `;
+            });
+
+            totalContainer.innerText = total;
+
+            const phone = "+79280048199";
+            let message = "Здравствуйте! Хочу оформить заказ в GULÌSTORY:%0A";
+            cart.forEach((item, index) => {
+                message += `${index + 1}. ${item.name} - ${item.price}₽%0A`;
+            });
+            message += `%0AИтого: ${total}₽`;
+            const link = document.getElementById('whatsapp-link');
+            link.href = `https://wa.me/${phone.replace('+', '')}?text=${message}`;
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCart();
+        }
+    </script>
+</body>
+</html>
