@@ -5,116 +5,224 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GULÌSTORY</title>
     <style>
-        body { font-family: 'Georgia', serif; background-color: #f0f7f0; color: #1e3a2f; margin: 0; padding: 20px; }
-        header { text-align: center; margin-bottom: 30px; }
-        h1 { color: #1e3a2f; letter-spacing: 3px; text-transform: uppercase; border-bottom: 2px solid #d4af37; display: inline-block; padding-bottom: 10px; }
-        .goods-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 25px; max-width: 1000px; margin: 0 auto; }
-        .card { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); text-align: center; border: 2px solid transparent; transition: 0.3s; }
-        .card:hover { border-color: #d4af37; transform: translateY(-5px); }
-        .card img { max-width: 100%; border-radius: 8px; height: 200px; object-fit: cover; margin-bottom: 15px; }
-        .price { color: #d4af37; font-weight: bold; font-size: 1.3em; margin: 10px 0; }
-        .add-btn { background-color: #1e3a2f; color: white; border: none; padding: 10px 20px; border-radius: 20px; cursor: pointer; font-size: 16px; width: 100%; }
-        .add-btn:hover { background-color: #d4af37; color: #1e3a2f; }
-        .cart-section { max-width: 1000px; margin: 40px auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 8px 16px rgba(0,0,0,0.1); }
-        .cart-section h2 { color: #1e3a2f; border-bottom: 2px solid #d4af37; padding-bottom: 10px; }
-        .cart-item { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
-        .total { font-size: 1.5em; font-weight: bold; color: #1e3a2f; text-align: right; margin-top: 20px; }
+        body { font-family: 'Georgia', serif; background: linear-gradient(135deg, #0a2e1f 0%, #1a4a2e 50%, #0a2e1f 100%); color: #f5f5dc; margin: 0; padding: 20px; overflow-x: hidden; position: relative; min-height: 100vh; }
+        
+        /* Цветы */
+        .flower-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; opacity: 0.8; }
+        .flower { position: absolute; background: radial-gradient(circle, #ffffff 20%, transparent 20%), radial-gradient(circle, #ffffff 20%, transparent 20%), radial-gradient(circle, #ffffff 20%, transparent 20%), radial-gradient(circle, #ffffff 20%, transparent 20%), radial-gradient(circle, #ffffff 20%, transparent 20%); background-size: 10px 10px; background-position: 0 0, 10px 0, 5px -5px, -5px -5px, 0 -10px; border-radius: 50%; animation: float 10s infinite ease-in-out; }
+        .flower:nth-child(1) { width: 40px; height: 40px; top: 10%; left: 5%; }
+        .flower:nth-child(2) { width: 25px; height: 25px; top: 60%; left: 90%; animation-delay: 2s; }
+        .flower:nth-child(3) { width: 30px; height: 30px; top: 80%; left: 15%; animation-delay: 4s; }
+        .flower:nth-child(4) { width: 20px; height: 20px; top: 30%; left: 80%; animation-delay: 6s; }
+        .flower:nth-child(5) { width: 50px; height: 50px; top: 5%; right: 10%; animation-delay: 8s; }
+        .flower:nth-child(6) { width: 35px; height: 35px; top: 45%; left: 50%; animation-delay: 1s; }
+        @keyframes float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-20px) rotate(45deg); } }
+
+        /* Блокировка прокрутки (эффекты остаются, но прокрутка запрещена) */
+        body.modal-open {
+            overflow: hidden;
+        }
+
+        /* Шапка */
+        header { text-align: center; margin-bottom: 30px; position: relative; z-index: 1; }
+        h1 { color: #e6d5a8; letter-spacing: 4px; text-transform: uppercase; font-size: 2.5em; border-bottom: 2px solid #e6d5a8; display: inline-block; padding-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        header p { color: #f5f5dc; font-size: 1.2em; margin-top: 10px; }
+
+        /* Кнопка корзины */
+        .floating-cart { position: fixed; top: 20px; right: 20px; z-index: 100; background: rgba(10, 46, 31, 0.95); border: 2px solid #e6d5a8; border-radius: 16px; padding: 10px 15px; text-align: center; transition: 0.3s; }
+        .floating-cart:hover { border-color: #ffffff; }
+        .floating-cart-text { color: #e6d5a8; font-size: 1.2em; font-weight: bold; letter-spacing: 1px; }
+        .floating-cart-icon { font-size: 0.9em; color: #e6d5a8; }
+        .floating-cart-count { font-size: 1em; color: #0a2e1f; background: #e6d5a8; border-radius: 50%; padding: 2px 8px; position: absolute; top: -5px; right: -5px; }
+
+        /* Выпадающая корзина */
+        .cart-dropdown { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000; background: rgba(10, 46, 31, 0.98); border: 2px solid #e6d5a8; border-radius: 16px; padding: 20px; max-width: 250px; width: 80%; display: none; }
+        .cart-dropdown.active { display: flex; flex-direction: column; }
+        .cart-dropdown h2 { color: #e6d5a8; border-bottom: 2px solid #e6d5a8; padding-bottom: 10px; }
+        .cart-item { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid rgba(230, 213, 168, 0.3); padding-bottom: 5px; color: #f5f5dc; }
+        .total { font-size: 1.5em; font-weight: bold; color: #e6d5a8; text-align: right; margin-top: 20px; }
         .whatsapp-btn { display: block; background-color: #25D366; color: white; text-decoration: none; padding: 15px; text-align: center; border-radius: 30px; font-size: 1.2em; margin-top: 20px; font-weight: bold; }
         .whatsapp-btn:hover { background-color: #128C7E; }
+        .close-cart { background: #ff4d4d; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 16px; cursor: pointer; position: absolute; top: 10px; right: 10px; }
+
+        /* Товары */
+        .goods-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 25px; max-width: 1000px; margin: 0 auto; position: relative; z-index: 1; }
+        .card { background: rgba(10, 46, 31, 0.9); border: 2px solid #e6d5a8; border-radius: 16px; padding: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); text-align: center; transition: 0.4s; }
+        .card:hover { border-color: #ffffff; transform: translateY(-8px); box-shadow: 0 16px 32px rgba(230, 213, 168, 0.3); }
+        .card img { max-width: 100%; border-radius: 12px; height: 200px; object-fit: cover; margin-bottom: 15px; border: 1px solid #e6d5a8; cursor: pointer; }
+        .card img:hover { transform: scale(1.03); }
+        .price { color: #e6d5a8; font-weight: bold; font-size: 1.4em; margin: 10px 0; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
+        .add-btn { background-color: #e6d5a8; color: #0a2e1f; border: none; padding: 12px 20px; border-radius: 20px; cursor: pointer; font-size: 16px; width: 100%; font-weight: bold; letter-spacing: 1px; }
+        .add-btn:hover { background-color: #ffffff; color: #0a2e1f; transform: scale(1.03); }
+
+        /* Модалка */
+        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 1000; }
+        .modal.active { display: flex; }
+        .modal-content { background: rgba(10, 46, 31, 0.95); border: 2px solid #e6d5a8; border-radius: 16px; padding: 25px; text-align: center; max-width: 450px; width: 90%; }
+        .modal-content img { max-width: 100%; border-radius: 12px; height: 300px; object-fit: cover; border: 1px solid #e6d5a8; }
+        .modal-price { color: #e6d5a8; font-weight: bold; font-size: 1.8em; margin: 15px 0; }
+        .modal-btn { background-color: #e6d5a8; color: #0a2e1f; border: none; padding: 12px 20px; border-radius: 20px; cursor: pointer; font-size: 16px; width: 100%; font-weight: bold; }
+        .modal-btn:hover { background-color: #ffffff; color: #0a2e1f; }
+        .close-modal { background: #ff4d4d; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 16px; cursor: pointer; position: absolute; top: 10px; right: 10px; }
     </style>
 </head>
 <body>
+    <!-- Цветы -->
+    <div class="flower-bg">
+        <div class="flower"></div>
+        <div class="flower"></div>
+        <div class="flower"></div>
+        <div class="flower"></div>
+        <div class="flower"></div>
+        <div class="flower"></div>
+    </div>
+
     <header>
         <h1>GULÌSTORY</h1>
         <p>Будь у себя в приоритете</p>
     </header>
 
+    <!-- Кнопка корзины -->
+    <div class="floating-cart" onclick="openCart()">
+        <span class="floating-cart-text">Корзина</span>
+        <span class="floating-cart-icon">🛒</span>
+        <div class="floating-cart-count" id="floating-count">0</div>
+    </div>
+
+    <!-- Выпадающая корзина -->
+    <div class="cart-dropdown" id="cart-dropdown">
+        <button class="close-cart" onclick="closeCart()">X</button>
+        <h2>🛒 Ваша корзина</h2>
+        <div id="cart-items" class="cart-items-scroll"></div>
+        <div class="total">Итого: <span id="total-price">0</span> ₽</div>
+        <a href="#" id="whatsapp-link" class="whatsapp-btn" target="_blank">Оформить в WhatsApp 📲</a>
+    </div>
+
     <div class="goods-grid">
-        
         <!-- ТОВАР 1 -->
         <div class="card">
-            <img "<a href='https://postimg.cc/p971yKpV' target='_blank'><img src='https://i.postimg.cc/1t5xCHSF/e42775bd-ac88-421d-83ad-e4ee13cf133f.jpg' border='0' alt='e42775bd-ac88-421d-83ad-e4ee13cf133f'></a>
-            <!-- Удали текст "" и напиши свою цифру (например 350) -->
+            <img src="https://i.postimg.cc/1t5xCHSF/e42775bd-ac88-421d-83ad-e4ee13cf133f.jpg" alt="Фото товара" onclick="openModal('https://i.postimg.cc/1t5xCHSF/e42775bd-ac88-421d-83ad-e4ee13cf133f.jpg', 6400)">
             <div class="price"><span class="price-value">6400</span> ₽</div>
-            <!-- В кнопке ВАЖНО: цифра после запятой должна быть ТОЧНО ТАКОЙ ЖЕ, как в цене выше -->
-            <button class="add-btn" onclick="addToCart('Товар 1',6400)">Добавить в корзину</button>
+            <button class="add-btn" onclick="addToCart('Товар 1', 6400)">Добавить в корзину</button>
         </div>
 
         <!-- ТОВАР 2 -->
         <div class="card">
-            <img src="https://i.postimg.cc/MTsChQZv/9a9427f7-cc7b-4ee0-a2a9-c59b918fab87.jpg" alt="Фото товара">
+            <img src="https://i.postimg.cc/MTsChQZv/9a9427f7-cc7b-4ee0-a2a9-c59b918fab87.jpg" alt="Фото товара" onclick="openModal('https://i.postimg.cc/MTsChQZv/9a9427f7-cc7b-4ee0-a2a9-c59b918fab87.jpg', 6400)">
             <div class="price"><span class="price-value">6400</span> ₽</div>
-            <button class="add-btn" onclick="addToCart('Товар 2',6400)">Добавить в корзину</button>
+            <button class="add-btn" onclick="addToCart('Товар 2', 6400)">Добавить в корзину</button>
         </div>
 
         <!-- ТОВАР 3 -->
         <div class="card">
-            <img src="суда сылку фото" alt="Фото товара">
+            <img src="суда сылку фото" alt="Фото товара" onclick="openModal('суда сылку фото', 1)">
             <div class="price"><span class="price-value">сюда цена</span> ₽</div>
-            <button class="add-btn" onclick="addToCart('Товар 3',и сюда)">Добавить в корзину</button>
+            <button class="add-btn" onclick="addToCart('Товар 3', и сюда)">Добавить в корзину</button>
         </div>
 
         <!-- ТОВАР 4 -->
         <div class="card">
-            <img src="ССЫЛКА_НА_ФОТО_4" alt="Фото товара">
+            <img src="ССЫЛКА_НА_ФОТО_4" alt="Фото товара" onclick="openModal('ССЫЛКА_НА_ФОТО_4', 1)">
             <div class="price"><span class="price-value">ВСТАВЬ_ЦЕНУ</span> ₽</div>
             <button class="add-btn" onclick="addToCart('Товар 4', ВСТАВЬ_ЦЕНУ)">Добавить в корзину</button>
         </div>
 
         <!-- ТОВАР 5 -->
         <div class="card">
-            <img src="ССЫЛКА_НА_ФОТО_5" alt="Фото товара">
+            <img src="ССЫЛКА_НА_ФОТО_5" alt="Фото товара" onclick="openModal('ССЫЛКА_НА_ФОТО_5', 1)">
             <div class="price"><span class="price-value">ВСТАВЬ_ЦЕНУ</span> ₽</div>
             <button class="add-btn" onclick="addToCart('Товар 5', ВСТАВЬ_ЦЕНУ)">Добавить в корзину</button>
         </div>
 
         <!-- ТОВАР 6 -->
         <div class="card">
-            <img src="ССЫЛКА_НА_ФОТО_6" alt="Фото товара">
+            <img src="ССЫЛКА_НА_ФОТО_6" alt="Фото товара" onclick="openModal('ССЫЛКА_НА_ФОТО_6', 1)">
             <div class="price"><span class="price-value">ВСТАВЬ_ЦЕНУ</span> ₽</div>
             <button class="add-btn" onclick="addToCart('Товар 6', ВСТАВЬ_ЦЕНУ)">Добавить в корзину</button>
         </div>
 
         <!-- ТОВАР 7 -->
         <div class="card">
-            <img src="ССЫЛКА_НА_ФОТО_7" alt="Фото товара">
+            <img src="ССЫЛКА_НА_ФОТО_7" alt="Фото товара" onclick="openModal('ССЫЛКА_НА_ФОТО_7', 1)">
             <div class="price"><span class="price-value">ВСТАВЬ_ЦЕНУ</span> ₽</div>
             <button class="add-btn" onclick="addToCart('Товар 7', ВСТАВЬ_ЦЕНУ)">Добавить в корзину</button>
         </div>
 
         <!-- ТОВАР 8 -->
         <div class="card">
-            <img src="ССЫЛКА_НА_ФОТО_8" alt="Фото товара">
+            <img src="ССЫЛКА_НА_ФОТО_8" alt="Фото товара" onclick="openModal('ССЫЛКА_НА_ФОТО_8', 1)">
             <div class="price"><span class="price-value">ВСТАВЬ_ЦЕНУ</span> ₽</div>
             <button class="add-btn" onclick="addToCart('Товар 8', ВСТАВЬ_ЦЕНУ)">Добавить в корзину</button>
         </div>
 
         <!-- ТОВАР 9 -->
         <div class="card">
-            <img src="ССЫЛКА_НА_ФОТО_9" alt="Фото товара">
+            <img src="ССЫЛКА_НА_ФОТО_9" alt="Фото товара" onclick="openModal('ССЫЛКА_НА_ФОТО_9', 1)">
             <div class="price"><span class="price-value">ВСТАВЬ_ЦЕНУ</span> ₽</div>
             <button class="add-btn" onclick="addToCart('Товар 9', ВСТАВЬ_ЦЕНУ)">Добавить в корзину</button>
         </div>
 
         <!-- ТОВАР 10 -->
         <div class="card">
-            <img src="ССЫЛКА_НА_ФОТО_10" alt="Фото товара">
+            <img src="ССЫЛКА_НА_ФОТО_10" alt="Фото товара" onclick="openModal('ССЫЛКА_НА_ФОТО_10', 1)">
             <div class="price"><span class="price-value">ВСТАВЬ_ЦЕНУ</span> ₽</div>
             <button class="add-btn" onclick="addToCart('Товар 10', ВСТАВЬ_ЦЕНУ)">Добавить в корзину</button>
         </div>
-
     </div>
 
-    <div class="cart-section">
-        <h2>🛒 Ваша корзина</h2>
-        <div id="cart-items"></div>
-        <div class="total">Итого: <span id="total-price">0</span> ₽</div>
-        
-        <a href="#" id="whatsapp-link" class="whatsapp-btn" target="_blank">Оформить в WhatsApp 📲</a>
+    <!-- Модальное окно -->
+    <div class="modal" id="modal" onclick="closeModal()">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="close-modal" onclick="closeModal()">X</button>
+            <img id="modal-image" src="" alt="Фото товара">
+            <div class="modal-price" id="modal-price"></div>
+            <button class="modal-btn" id="modal-add-btn" onclick="addToCart('Товар', 1)">Добавить в корзину</button>
+        </div>
     </div>
 
     <script>
         let cart = [];
+        let modalProduct = { name: "Товар", price: 1 };
+
+        // Функция для блокировки прокрутки заднего фона
+        function toggleScrollLock(lock) {
+            if (lock) {
+                document.body.style.overflow = 'hidden';
+            } else {
+                document.body.style.overflow = '';
+            }
+        }
+
+        function openModal(imageSrc, price) {
+            const modal = document.getElementById('modal');
+            const modalImage = document.getElementById('modal-image');
+            const modalPrice = document.getElementById('modal-price');
+            const modalBtn = document.getElementById('modal-add-btn');
+            modalImage.src = imageSrc;
+            modalPrice.innerText = `${price} ₽`;
+            modalProduct = { name: "Товар", price: price };
+            modalBtn.onclick = function() { addToCart('Товар', price); closeModal(); };
+            modal.classList.add('active');
+            toggleScrollLock(true); // Блокируем прокрутку
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('modal');
+            modal.classList.remove('active');
+            toggleScrollLock(false); // Разблокируем прокрутку
+        }
+
+        function openCart() {
+            const cartDropdown = document.getElementById('cart-dropdown');
+            cartDropdown.classList.add('active');
+            toggleScrollLock(true); // Блокируем прокрутку
+        }
+
+        function closeCart() {
+            const cartDropdown = document.getElementById('cart-dropdown');
+            cartDropdown.classList.remove('active');
+            toggleScrollLock(false); // Разблокируем прокрутку
+        }
 
         function addToCart(name, price) {
             cart.push({ name, price });
@@ -124,9 +232,9 @@
         function updateCart() {
             const cartContainer = document.getElementById('cart-items');
             const totalContainer = document.getElementById('total-price');
+            const floatingCount = document.getElementById('floating-count');
             cartContainer.innerHTML = '';
             let total = 0;
-            
             cart.forEach((item, index) => {
                 total += item.price;
                 cartContainer.innerHTML += `
@@ -138,8 +246,8 @@
                     </div>
                 `;
             });
-
             totalContainer.innerText = total;
+            floatingCount.innerText = cart.length;
 
             const phone = "+79388955155";
             let message = "Здравствуйте! Хочу оформить заказ в GULÌSTORY:%0A";
