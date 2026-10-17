@@ -23,19 +23,16 @@
         h1 { color: #e6d5a8; letter-spacing: 4px; text-transform: uppercase; font-size: 2.5em; border-bottom: 2px solid #e6d5a8; display: inline-block; padding-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
         header p { color: #f5f5dc; font-size: 1.2em; margin-top: 10px; }
 
-        /* Кнопка корзины */
         .floating-cart { position: fixed; top: 20px; right: 20px; z-index: 100; background: rgba(10, 46, 31, 0.95); border: 2px solid #e6d5a8; border-radius: 16px; padding: 10px 15px; text-align: center; transition: 0.3s; cursor: pointer; }
         .floating-cart:hover { border-color: #ffffff; }
         .floating-cart-text { color: #e6d5a8; font-size: 1.2em; font-weight: bold; letter-spacing: 1px; }
         .floating-cart-icon { font-size: 0.9em; color: #e6d5a8; }
         .floating-cart-count { font-size: 1em; color: #0a2e1f; background: #e6d5a8; border-radius: 50%; padding: 2px 8px; position: absolute; top: -5px; right: -5px; }
 
-        /* НОВОЕ: Кнопка админа */
         .floating-admin { position: fixed; top: 20px; left: 20px; z-index: 100; background: rgba(10, 46, 31, 0.95); border: 2px solid #e6d5a8; border-radius: 16px; padding: 10px 15px; text-align: center; transition: 0.3s; cursor: pointer; }
         .floating-admin:hover { border-color: #ffffff; }
         .floating-admin-text { color: #e6d5a8; font-size: 1.2em; font-weight: bold; letter-spacing: 1px; }
 
-        /* Выпадающая корзина */
         .cart-dropdown { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000; background: rgba(10, 46, 31, 0.98); border: 2px solid #e6d5a8; border-radius: 16px; padding: 20px; max-width: 250px; width: 80%; display: none; }
         .cart-dropdown.active { display: flex; flex-direction: column; }
         .cart-dropdown h2 { color: #e6d5a8; border-bottom: 2px solid #e6d5a8; padding-bottom: 10px; }
@@ -45,7 +42,6 @@
         .whatsapp-btn:hover { background-color: #128C7E; }
         .close-cart { background: #ff4d4d; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 16px; cursor: pointer; position: absolute; top: 10px; right: 10px; }
 
-        /* Товары */
         .goods-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 25px; max-width: 1000px; margin: 0 auto; position: relative; z-index: 1; }
         .card { background: rgba(10, 46, 31, 0.9); border: 2px solid #e6d5a8; border-radius: 16px; padding: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); text-align: center; transition: 0.4s; }
         .card:hover { border-color: #ffffff; transform: translateY(-8px); box-shadow: 0 16px 32px rgba(230, 213, 168, 0.3); }
@@ -55,17 +51,15 @@
         .add-btn { background-color: #e6d5a8; color: #0a2e1f; border: none; padding: 12px 20px; border-radius: 20px; cursor: pointer; font-size: 16px; width: 100%; font-weight: bold; letter-spacing: 1px; }
         .add-btn:hover { background-color: #ffffff; color: #0a2e1f; transform: scale(1.03); }
 
-        /* Модалка */
         .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 1000; }
         .modal.active { display: flex; }
         .modal-content { background: rgba(10, 46, 31, 0.95); border: 2px solid #e6d5a8; border-radius: 16px; padding: 25px; text-align: center; max-width: 450px; width: 90%; position: relative; }
-        .modal-content img { max-width: 100%; border-radius: 12px; height: 300px; object-fit: cover; border: 1px solid #e6d5a8; }
+        .modal-content img { max-width: 100%; max-height: 50vh; border-radius: 12px; object-fit: contain; border: 1px solid #e6d5a8; }
         .modal-price { color: #e6d5a8; font-weight: bold; font-size: 1.8em; margin: 15px 0; }
         .modal-btn { background-color: #e6d5a8; color: #0a2e1f; border: none; padding: 12px 20px; border-radius: 20px; cursor: pointer; font-size: 16px; width: 100%; font-weight: bold; }
         .modal-btn:hover { background-color: #ffffff; color: #0a2e1f; }
         .close-modal { background: #ff4d4d; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 16px; cursor: pointer; position: absolute; top: 10px; right: 10px; }
 
-        /* НОВОЕ: Модалка ввода пароля */
         .auth-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 2000; }
         .auth-modal.active { display: flex; }
         .auth-content { background: rgba(10, 46, 31, 0.95); border: 2px solid #e6d5a8; border-radius: 16px; padding: 25px; text-align: center; max-width: 350px; width: 90%; position: relative; }
@@ -73,7 +67,6 @@
         .auth-btn { background-color: #e6d5a8; color: #0a2e1f; border: none; padding: 12px 20px; border-radius: 20px; cursor: pointer; font-size: 16px; width: 100%; font-weight: bold; }
         .auth-btn:hover { background-color: #ffffff; }
 
-        /* НОВОЕ: Админ-панель */
         .admin-panel { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); display: none; justify-content: center; align-items: flex-start; z-index: 3000; overflow-y: auto; padding: 20px 0; }
         .admin-panel.active { display: flex; }
         .admin-content { background: rgba(10, 46, 31, 0.98); border: 2px solid #e6d5a8; border-radius: 16px; padding: 20px; max-width: 800px; width: 95%; position: relative; margin: 20px; }
@@ -83,7 +76,14 @@
         .product-edit h3 { color: #e6d5a8; margin: 0; font-size: 1.1em; }
         .product-edit label { font-size: 0.9em; color: #aaa; margin-bottom: -5px; }
         .product-edit input { padding: 8px; border-radius: 5px; border: 1px solid #e6d5a8; background: #0a2e1f; color: #fff; width: 100%; box-sizing: border-box; }
-        .save-btn { background: #25D366; color: white; border: none; padding: 10px; border-radius: 10px; font-size: 1em; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        
+        /* Стили для загрузки фото */
+        .file-input-wrapper { position: relative; overflow: hidden; display: inline-block; width: 100%; }
+        .file-input-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; width: 100%; }
+        .file-btn { background-color: #e6d5a8; color: #0a2e1f; border: none; padding: 10px; border-radius: 8px; font-size: 1em; font-weight: bold; cursor: pointer; width: 100%; text-align: center; display: block; box-sizing: border-box; }
+        .preview-img { max-width: 100px; max-height: 100px; object-fit: cover; border-radius: 5px; border: 1px solid #e6d5a8; margin-top: 5px; }
+
+        .save-btn { background: #25D366; color: white; border: none; padding: 10px; border-radius: 10px; font-size: 1em; font-weight: bold; cursor: pointer; margin-top: 10px; width: 100%; }
         .save-btn:hover { background: #128C7E; }
     </style>
 </head>
@@ -102,19 +102,16 @@
         <p>Будь у себя в приоритете</p>
     </header>
 
-    <!-- Кнопка Админа -->
     <div class="floating-admin" onclick="openAuth()">
         <span class="floating-admin-text">Админ ⚙️</span>
     </div>
 
-    <!-- Кнопка корзины -->
     <div class="floating-cart" onclick="openCart()">
         <span class="floating-cart-text">Корзина</span>
         <span class="floating-cart-icon">🛒</span>
         <div class="floating-cart-count" id="floating-count">0</div>
     </div>
 
-    <!-- Выпадающая корзина -->
     <div class="cart-dropdown" id="cart-dropdown">
         <button class="close-cart" onclick="closeCart()">X</button>
         <h2>🛒 Ваша корзина</h2>
@@ -123,11 +120,8 @@
         <a href="#" id="whatsapp-link" class="whatsapp-btn" target="_blank">Оформить в WhatsApp 📲</a>
     </div>
 
-    <div class="goods-grid" id="goods-grid">
-        <!-- ТОВАРЫ БУДУТ РЕНДЕРИТЬСЯ ИЗ JS -->
-    </div>
+    <div class="goods-grid" id="goods-grid"></div>
 
-    <!-- Модальное окно товара -->
     <div class="modal" id="modal" onclick="closeModal()">
         <div class="modal-content" onclick="event.stopPropagation()">
             <button class="close-modal" onclick="closeModal()">X</button>
@@ -137,7 +131,6 @@
         </div>
     </div>
 
-    <!-- Модалка ввода пароля -->
     <div class="auth-modal" id="auth-modal">
         <div class="auth-content">
             <h3 style="color:#e6d5a8; margin-top:0;">Вход в админ-панель</h3>
@@ -147,7 +140,6 @@
         </div>
     </div>
 
-    <!-- Админ-панель -->
     <div class="admin-panel" id="admin-panel">
         <div class="admin-content">
             <button class="admin-close" onclick="closeAdmin()">X</button>
@@ -158,7 +150,6 @@
     </div>
 
     <script>
-        // --- ДАННЫЕ ПО УМОЛЧАНИЮ (ТВОИ ТОВАРЫ) ---
         const defaultProducts = [
             { id: 1, name: "Товар 1", price: 6400, image: "https://i.postimg.cc/1t5xCHSF/e42775bd-ac88-421d-83ad-e4ee13cf133f.jpg" },
             { id: 2, name: "Товар 2", price: 6400, image: "https://i.postimg.cc/MTsChQZv/9a9427f7-cc7b-4ee0-a2a9-c59b918fab87.jpg" },
@@ -175,7 +166,6 @@
         let products = [];
         let cart = [];
 
-        // Загрузка товаров из localStorage или дефолтных
         function loadProducts() {
             const saved = localStorage.getItem('gulistory_products');
             if (saved) {
@@ -186,7 +176,6 @@
             renderProducts();
         }
 
-        // Отрисовка товаров на сайте
         function renderProducts() {
             const grid = document.getElementById('goods-grid');
             grid.innerHTML = '';
@@ -201,7 +190,6 @@
             });
         }
 
-        // --- АДМИНКА ---
         const ADMIN_PASSWORD = "Story5155";
 
         function openAuth() {
@@ -223,10 +211,14 @@
             }
         }
 
+        // Переменная для хранения временных новых фото
+        let tempImages = {};
+
         function openAdmin() {
             const panel = document.getElementById('admin-panel');
             const list = document.getElementById('admin-products-list');
             list.innerHTML = '';
+            tempImages = {}; // сбрасываем временные фото
             
             products.forEach((p, index) => {
                 list.innerHTML += `
@@ -234,15 +226,36 @@
                         <h3>${p.name}</h3>
                         <label>Название:</label>
                         <input type="text" id="admin-name-${index}" value="${p.name}">
+                        
                         <label>Цена (₽):</label>
                         <input type="number" id="admin-price-${index}" value="${p.price}">
-                        <label>Ссылка на фото (URL):</label>
-                        <input type="text" id="admin-image-${index}" value="${p.image}">
+                        
+                        <label>Фото товара:</label>
+                        <img src="${p.image}" id="admin-preview-${index}" class="preview-img" alt="Превью">
+                        <div class="file-input-wrapper">
+                            <button class="file-btn">Выбрать фото с устройства</button>
+                            <input type="file" accept="image/*" onchange="handleImageUpload(event, ${index})">
+                        </div>
                     </div>
                 `;
             });
             
             panel.classList.add('active');
+        }
+
+        // Функция загрузки фото с устройства
+        function handleImageUpload(event, index) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                // Сохраняем временно (в base64)
+                tempImages[index] = e.target.result;
+                // Обновляем превью в админке
+                document.getElementById('admin-preview-' + index).src = e.target.result;
+            };
+            reader.readAsDataURL(file);
         }
 
         function closeAdmin() {
@@ -253,15 +266,22 @@
             products.forEach((p, index) => {
                 p.name = document.getElementById('admin-name-' + index).value;
                 p.price = parseInt(document.getElementById('admin-price-' + index).value) || 0;
-                p.image = document.getElementById('admin-image-' + index).value;
+                // Если было загружено новое фото — берем его, иначе оставляем старое
+                if (tempImages[index]) {
+                    p.image = tempImages[index];
+                }
             });
-            localStorage.setItem('gulistory_products', JSON.stringify(products));
-            renderProducts();
-            closeAdmin();
-            alert("Изменения сохранены!");
+            
+            try {
+                localStorage.setItem('gulistory_products', JSON.stringify(products));
+                renderProducts();
+                closeAdmin();
+                alert("Изменения сохранены!");
+            } catch (e) {
+                alert("Ошибка сохранения! Возможно, фото слишком большое для памяти браузера. Попробуйте фото поменьше.");
+            }
         }
 
-        // --- КОРЗИНА И МОДАЛКИ ---
         function toggleScrollLock(lock) {
             document.body.style.overflow = lock ? 'hidden' : '';
         }
@@ -330,7 +350,6 @@
             updateCart();
         }
 
-        // Инициализация при загрузке
         window.onload = loadProducts;
     </script>
 </body>
