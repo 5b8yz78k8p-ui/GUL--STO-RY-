@@ -74,7 +74,7 @@
         .admin-close { position: absolute; top: 10px; right: 15px; background: #ff4d4d; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 16px; cursor: pointer; }
         
         .product-edit { background: rgba(255,255,255,0.05); border: 1px solid rgba(230, 213, 168, 0.3); border-radius: 10px; padding: 15px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; position: relative; }
-        .product-edit h3 { color: #e6d5a8; margin: 0; font-size: 1.1em; padding-right: 35px; }
+        .product-edit h3 { color: #e6d5a8; margin: 0; font-size: 1.1em; padding-right: 80px; }
         .product-edit label { font-size: 0.9em; color: #aaa; margin-bottom: -5px; }
         .product-edit input { padding: 8px; border-radius: 5px; border: 1px solid #e6d5a8; background: #0a2e1f; color: #fff; width: 100%; box-sizing: border-box; }
         
@@ -86,8 +86,8 @@
         .save-btn { background: #25D366; color: white; border: none; padding: 12px; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; margin-top: 20px; width: 100%; }
         .save-btn:hover { background: #128C7E; }
 
-        /* НОВОЕ: Кнопки добавления и удаления */
-        .add-new-btn { background: #e6d5a8; color: #0a2e1f; border: 2px dashed #e6d5a8; padding: 15px; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 20px; text-align: center; background: transparent; color: #e6d5a8; }
+        /* Кнопки добавления и удаления */
+        .add-new-btn { background: transparent; color: #e6d5a8; border: 2px dashed #e6d5a8; padding: 15px; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 20px; text-align: center; }
         .add-new-btn:hover { background: rgba(230, 213, 168, 0.1); }
         .delete-btn { position: absolute; top: 10px; right: 10px; background: #ff4d4d; color: white; border: none; border-radius: 5px; padding: 5px 10px; cursor: pointer; font-weight: bold; font-size: 0.9em; }
         .delete-btn:hover { background: #cc0000; }
@@ -214,9 +214,9 @@
     </script>
 
     <script>
-        let products = []; // Загруженные из Firebase
-        let newProducts = []; // Новые, еще не сохраненные
-        let deletedProducts = []; // ID на удаление
+        let products = [];
+        let newProducts = [];
+        let deletedProducts = [];
         let cart = [];
         const ADMIN_PASSWORD = "Story5155";
         let tempImages = {};
@@ -258,10 +258,7 @@
         async function seedDefaultProducts() {
             const defaults = [
                 { name: "Товар 1", price: 6400, image: "https://i.postimg.cc/1t5xCHSF/e42775bd-ac88-421d-83ad-e4ee13cf133f.jpg", order: 1 },
-                { name: "Товар 2", price: 6400, image: "https://i.postimg.cc/MTsChQZv/9a9427f7-cc7b-4ee0-a2a9-c59b918fab87.jpg", order: 2 },
-                { name: "Товар 3", price: 0, image: "https://placehold.co/400x400/0a2e1f/e6d5a8?text=Фото", order: 3 },
-                { name: "Товар 4", price: 0, image: "https://placehold.co/400x400/0a2e1f/e6d5a8?text=Фото", order: 4 },
-                { name: "Товар 5", price: 0, image: "https://placehold.co/400x400/0a2e1f/e6d5a8?text=Фото", order: 5 }
+                { name: "Товар 2", price: 6400, image: "https://i.postimg.cc/MTsChQZv/9a9427f7-cc7b-4ee0-a2a9-c59b918fab87.jpg", order: 2 }
             ];
 
             for (const item of defaults) {
@@ -312,7 +309,6 @@
             deletedProducts = [];
             newProductCounter = 0;
             
-            // Рендерим существующие товары
             products.forEach((p, index) => {
                 list.innerHTML += createProductEditHTML(p, index, false);
             });
@@ -320,13 +316,11 @@
             panel.classList.add('active');
         }
 
-        // Функция для генерации HTML формы товара (для существующих и новых)
         function createProductEditHTML(product, index, isNew) {
             const name = product.name || '';
             const price = product.price || 0;
             const image = product.image || 'https://placehold.co/400x400/0a2e1f/e6d5a8?text=Новое+фото';
             
-            // Для новых товаров используем отрицательный индекс, чтобы не путать с существующими
             const idx = isNew ? 'new-' + index : index;
             const title = isNew ? 'Новый товар' : name;
 
@@ -357,7 +351,6 @@
             const newProduct = { name: '', price: 0, image: '' };
             newProducts.push(newProduct);
             
-            // Добавляем в конец списка
             const div = document.createElement('div');
             div.innerHTML = createProductEditHTML(newProduct, newIndex, true);
             list.appendChild(div.firstElementChild);
@@ -367,7 +360,6 @@
             const product = products[index];
             if (confirm(`Удалить товар "${product.name}"?`)) {
                 deletedProducts.push(product.id);
-                // Визуально скрываем блок
                 const block = document.getElementById('edit-block-' + index);
                 if (block) block.style.display = 'none';
             }
@@ -408,9 +400,8 @@
                     await window.firebaseDeleteDoc(window.firebaseDoc(window.firebaseDB, "products", id));
                 }
 
-                // 2. ОБНОВЛЕНИЕ СУЩЕСТВУЮЩИХ
+                // 2. ОБНОВЛЕНИЕ
                 for (let index = 0; index < products.length; index++) {
-                    // Если товар помечен на удаление, пропускаем
                     if (deletedProducts.includes(products[index].id)) continue;
 
                     const p = products[index];
@@ -456,7 +447,7 @@
                     });
                 }
 
-                // 3. ДОБАВЛЕНИЕ НОВЫХ
+                // 3. ДОБАВЛЕНИЕ
                 for (let i = 0; i < newProducts.length; i++) {
                     const idx = 'new-' + i;
                     const newName = document.getElementById('admin-name-' + idx).value;
@@ -497,7 +488,7 @@
                         name: newName,
                         price: newPrice,
                         image: imageUrl,
-                        order: Date.now() // Чтобы новые были в конце
+                        order: Date.now()
                     });
                 }
 
@@ -521,65 +512,3 @@
             const modal = document.getElementById('modal');
             document.getElementById('modal-image').src = imageSrc;
             document.getElementById('modal-price').innerText = `${price} ₽`;
-            document.getElementById('modal-add-btn').onclick = function() { addToCart(name, price); closeModal(); };
-            modal.classList.add('active');
-            toggleScrollLock(true);
-        }
-
-        function closeModal() {
-            document.getElementById('modal').classList.remove('active');
-            toggleScrollLock(false);
-        }
-
-        function openCart() {
-            document.getElementById('cart-dropdown').classList.add('active');
-            toggleScrollLock(true);
-        }
-
-        function closeCart() {
-            document.getElementById('cart-dropdown').classList.remove('active');
-            toggleScrollLock(false);
-        }
-
-        function addToCart(name, price) {
-            cart.push({ name, price });
-            updateCart();
-        }
-
-        function updateCart() {
-            const cartContainer = document.getElementById('cart-items');
-            const totalContainer = document.getElementById('total-price');
-            const floatingCount = document.getElementById('floating-count');
-            cartContainer.innerHTML = '';
-            let total = 0;
-            cart.forEach((item, index) => {
-                total += item.price;
-                cartContainer.innerHTML += `
-                    <div class="cart-item">
-                        <span>${item.name}</span>
-                        <span>${item.price} ₽ 
-                            <button onclick="removeFromCart(${index})" style="background:red; color:white; border:none; border-radius:5px; cursor:pointer;">X</button>
-                        </span>
-                    </div>
-                `;
-            });
-            totalContainer.innerText = total;
-            floatingCount.innerText = cart.length;
-
-            const phone = "+79388955155";
-            let message = "Здравствуйте! Хочу оформить заказ в GULÌSTORY:%0A";
-            cart.forEach((item, index) => {
-                message += `${index + 1}. ${item.name} - ${item.price}₽%0A`;
-            });
-            message += `%0AИтого: ${total}₽`;
-            const link = document.getElementById('whatsapp-link');
-            link.href = `https://wa.me/${phone.replace('+', '')}?text=${message}`;
-        }
-
-        function removeFromCart(index) {
-            cart.splice(index, 1);
-            updateCart();
-        }
-    </script>
-</body>
-</html>
