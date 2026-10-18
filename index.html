@@ -78,28 +78,28 @@
         .product-edit label { font-size: 0.9em; color: #aaa; margin-bottom: -5px; }
         .product-edit input { padding: 8px; border-radius: 5px; border: 1px solid #e6d5a8; background: #0a2e1f; color: #fff; width: 100%; box-sizing: border-box; }
         
-        .file-input-wrapper { position: relative; overflow: hidden; display: inline-block; width: 100%; }
-        .file-input-wrapper input[type=file] { font-size: 100px; position: absolute; left: 0; top: 0; opacity: 0; cursor: pointer; height: 100%; width: 100%; }
-        .file-btn { background-color: #e6d5a8; color: #0a2e1f; border: none; padding: 10px; border-radius: 8px; font-size: 1em; font-weight: bold; cursor: pointer; width: 100%; text-align: center; display: block; box-sizing: border-box; }
         .preview-img { max-width: 100px; max-height: 100px; object-fit: cover; border-radius: 5px; border: 1px solid #e6d5a8; margin-top: 5px; }
 
         .save-btn { background: #25D366; color: white; border: none; padding: 12px; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; margin-top: 20px; width: 100%; }
         .save-btn:hover { background: #128C7E; }
 
-        /* Кнопки добавления и удаления */
+        /* Стили для кнопок добавления/удаления и ссылки */
         .add-new-btn { background: transparent; color: #e6d5a8; border: 2px dashed #e6d5a8; padding: 15px; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 20px; text-align: center; }
         .add-new-btn:hover { background: rgba(230, 213, 168, 0.1); }
         .delete-btn { position: absolute; top: 10px; right: 10px; background: #ff4d4d; color: white; border: none; border-radius: 5px; padding: 5px 10px; cursor: pointer; font-weight: bold; font-size: 0.9em; }
         .delete-btn:hover { background: #cc0000; }
+
+        /* Группа для ввода ссылки и кнопки перехода */
+        .link-input-group { display: flex; gap: 10px; align-items: center; }
+        .link-input-group input { flex: 1; }
+        .open-site-btn { background-color: #e6d5a8; color: #0a2e1f; border: none; padding: 8px 12px; border-radius: 5px; font-size: 0.9em; font-weight: bold; cursor: pointer; white-space: nowrap; }
+        .open-site-btn:hover { background-color: #ffffff; }
 
         .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 4000; flex-direction: column; }
         .loading-overlay.active { display: flex; }
         .spinner { border: 4px solid rgba(255,255,255,0.3); border-top: 4px solid #e6d5a8; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .loading-text { color: #e6d5a8; font-size: 1.2em; text-align: center; padding: 0 20px; }
-        
-        .progress-container { width: 80%; max-width: 300px; background: rgba(255,255,255,0.2); border-radius: 10px; margin-top: 10px; height: 10px; overflow: hidden; display: none; }
-        .progress-bar { height: 100%; background: #e6d5a8; width: 0%; transition: width 0.2s; }
     </style>
 </head>
 <body>
@@ -162,7 +162,6 @@
             <button class="admin-close" onclick="closeAdmin()">X</button>
             <h2>Управление товарами</h2>
             
-            <!-- Кнопка добавления нового товара -->
             <button class="add-new-btn" onclick="addNewProductRow()">+ Добавить новый товар</button>
             
             <div id="admin-products-list"></div>
@@ -173,15 +172,11 @@
     <div class="loading-overlay" id="loading-overlay">
         <div class="spinner"></div>
         <div class="loading-text" id="loading-text">Загрузка...</div>
-        <div class="progress-container" id="progress-container">
-            <div class="progress-bar" id="progress-bar"></div>
-        </div>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
         import { getFirestore, collection, getDocs, doc, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
-        import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-storage.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyBQABRSfd8HGHrabbXyqhN1KN-_mS8G-8Y",
@@ -195,19 +190,14 @@
 
         const app = initializeApp(firebaseConfig);
         const db = getFirestore(app);
-        const storage = getStorage(app);
 
         window.firebaseDB = db;
-        window.firebaseStorage = storage;
         window.firebaseCollection = collection;
         window.firebaseGetDocs = getDocs;
         window.firebaseDoc = doc;
         window.firebaseAddDoc = addDoc;
         window.firebaseUpdateDoc = updateDoc;
         window.firebaseDeleteDoc = deleteDoc;
-        window.firebaseRef = ref;
-        window.firebaseUploadBytesResumable = uploadBytesResumable;
-        window.firebaseGetDownloadURL = getDownloadURL;
 
         window.firebaseReady = true;
         document.dispatchEvent(new Event('firebaseReady'));
@@ -219,9 +209,11 @@
         let deletedProducts = [];
         let cart = [];
         const ADMIN_PASSWORD = "Story5155";
-        let tempImages = {};
         let isFirebaseReady = false;
         let newProductCounter = 0;
+
+        // Ссылка на сайт для загрузки фото (пока Postimages)
+        const UPLOAD_SITE_URL = "https://postimages.org/";
 
         document.addEventListener('firebaseReady', () => {
             isFirebaseReady = true;
@@ -304,7 +296,6 @@
             const panel = document.getElementById('admin-panel');
             const list = document.getElementById('admin-products-list');
             list.innerHTML = '';
-            tempImages = {};
             newProducts = [];
             deletedProducts = [];
             newProductCounter = 0;
@@ -316,10 +307,11 @@
             panel.classList.add('active');
         }
 
+        // ВОТ ЗДЕСЬ МЫ СДЕЛАЛИ ПОЛЕ ДЛЯ ССЫЛКИ И КНОПКУ ПЕРЕХОДА
         function createProductEditHTML(product, index, isNew) {
             const name = product.name || '';
             const price = product.price || 0;
-            const image = product.image || 'https://placehold.co/400x400/0a2e1f/e6d5a8?text=Новое+фото';
+            const image = product.image || '';
             
             const idx = isNew ? 'new-' + index : index;
             const title = isNew ? 'Новый товар' : name;
@@ -335,14 +327,18 @@
                     <label>Цена (₽):</label>
                     <input type="number" id="admin-price-${idx}" value="${price}">
                     
-                    <label>Фото товара:</label>
-                    <img src="${image}" id="admin-preview-${idx}" class="preview-img" alt="Превью">
-                    <div class="file-input-wrapper">
-                        <button class="file-btn">Выбрать фото с устройства</button>
-                        <input type="file" accept="image/*" onchange="handleImageUpload(event, '${idx}')">
+                    <label>Ссылка на фото (URL):</label>
+                    <div class="link-input-group">
+                        <input type="text" id="admin-image-${idx}" value="${image}" placeholder="Вставьте ссылку сюда...">
+                        <button class="open-site-btn" onclick="openUploadSite()">Загрузить фото</button>
                     </div>
+                    <img src="${image}" id="admin-preview-${idx}" class="preview-img" alt="Превью" onerror="this.style.display='none'">
                 </div>
             `;
+        }
+
+        function openUploadSite() {
+            window.open(UPLOAD_SITE_URL, '_blank');
         }
 
         function addNewProductRow() {
@@ -365,18 +361,6 @@
             }
         }
 
-        function handleImageUpload(event, idx) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            const reader = new FileReader();
-            reader.onload = function(e) {
-                tempImages[idx] = e.target.result;
-                document.getElementById('admin-preview-' + idx).src = e.target.result;
-            };
-            reader.readAsDataURL(file);
-        }
-
         function closeAdmin() {
             document.getElementById('admin-panel').classList.remove('active');
         }
@@ -386,12 +370,8 @@
             
             const overlay = document.getElementById('loading-overlay');
             const loadingText = document.getElementById('loading-text');
-            const progressContainer = document.getElementById('progress-container');
-            const progressBar = document.getElementById('progress-bar');
             
             overlay.classList.add('active');
-            progressContainer.style.display = 'none';
-            progressBar.style.width = '0%';
 
             try {
                 // 1. УДАЛЕНИЕ
@@ -407,43 +387,13 @@
                     const p = products[index];
                     const newName = document.getElementById('admin-name-' + index).value;
                     const newPrice = parseInt(document.getElementById('admin-price-' + index).value) || 0;
-                    
-                    let imageUrl = p.image;
-
-                    if (tempImages[index]) {
-                        loadingText.innerText = `Загрузка фото для "${newName}"...`;
-                        progressContainer.style.display = 'block';
-                        
-                        const response = await fetch(tempImages[index]);
-                        const blob = await response.blob();
-                        const fileName = `product_${Date.now()}_${index}.jpg`;
-                        const storageRef = window.firebaseRef(window.firebaseStorage, `products/${fileName}`);
-                        
-                        const uploadTask = window.firebaseUploadBytesResumable(storageRef, blob);
-                        
-                        imageUrl = await new Promise((resolve, reject) => {
-                            const timeout = setTimeout(() => reject(new Error("Время загрузки истекло (30 сек).")), 30000);
-                            uploadTask.on('state_changed', 
-                                (snapshot) => {
-                                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                                    progressBar.style.width = progress + '%';
-                                }, 
-                                (error) => { clearTimeout(timeout); reject(error); }, 
-                                async () => {
-                                    clearTimeout(timeout);
-                                    try { resolve(await window.firebaseGetDownloadURL(uploadTask.snapshot.ref)); } 
-                                    catch (err) { reject(err); }
-                                }
-                            );
-                        });
-                        progressContainer.style.display = 'none';
-                    }
+                    const newImage = document.getElementById('admin-image-' + index).value;
 
                     loadingText.innerText = `Сохранение: ${newName}...`;
                     await window.firebaseUpdateDoc(window.firebaseDoc(window.firebaseDB, "products", p.id), {
                         name: newName,
                         price: newPrice,
-                        image: imageUrl
+                        image: newImage
                     });
                 }
 
@@ -452,42 +402,13 @@
                     const idx = 'new-' + i;
                     const newName = document.getElementById('admin-name-' + idx).value;
                     const newPrice = parseInt(document.getElementById('admin-price-' + idx).value) || 0;
-                    let imageUrl = 'https://placehold.co/400x400/0a2e1f/e6d5a8?text=Фото';
-
-                    if (tempImages[idx]) {
-                        loadingText.innerText = `Загрузка фото для "${newName}"...`;
-                        progressContainer.style.display = 'block';
-                        
-                        const response = await fetch(tempImages[idx]);
-                        const blob = await response.blob();
-                        const fileName = `product_new_${Date.now()}_${i}.jpg`;
-                        const storageRef = window.firebaseRef(window.firebaseStorage, `products/${fileName}`);
-                        
-                        const uploadTask = window.firebaseUploadBytesResumable(storageRef, blob);
-                        
-                        imageUrl = await new Promise((resolve, reject) => {
-                            const timeout = setTimeout(() => reject(new Error("Время загрузки истекло (30 сек).")), 30000);
-                            uploadTask.on('state_changed', 
-                                (snapshot) => {
-                                    const progress = (snapshot.bytesTransferred / snapshot.totalBytes) * 100;
-                                    progressBar.style.width = progress + '%';
-                                }, 
-                                (error) => { clearTimeout(timeout); reject(error); }, 
-                                async () => {
-                                    clearTimeout(timeout);
-                                    try { resolve(await window.firebaseGetDownloadURL(uploadTask.snapshot.ref)); } 
-                                    catch (err) { reject(err); }
-                                }
-                            );
-                        });
-                        progressContainer.style.display = 'none';
-                    }
+                    const newImage = document.getElementById('admin-image-' + idx).value || 'https://placehold.co/400x400/0a2e1f/e6d5a8?text=Фото';
 
                     loadingText.innerText = `Добавление: ${newName}...`;
                     await window.firebaseAddDoc(window.firebaseCollection(window.firebaseDB, "products"), {
                         name: newName,
                         price: newPrice,
-                        image: imageUrl,
+                        image: newImage,
                         order: Date.now()
                     });
                 }
