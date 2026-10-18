@@ -512,3 +512,65 @@
             const modal = document.getElementById('modal');
             document.getElementById('modal-image').src = imageSrc;
             document.getElementById('modal-price').innerText = `${price} ₽`;
+            document.getElementById('modal-add-btn').onclick = function() { addToCart(name, price); closeModal(); };
+            modal.classList.add('active');
+            toggleScrollLock(true);
+        }
+
+        function closeModal() {
+            document.getElementById('modal').classList.remove('active');
+            toggleScrollLock(false);
+        }
+
+        function openCart() {
+            document.getElementById('cart-dropdown').classList.add('active');
+            toggleScrollLock(true);
+        }
+
+        function closeCart() {
+            document.getElementById('cart-dropdown').classList.remove('active');
+            toggleScrollLock(false);
+        }
+
+        function addToCart(name, price) {
+            cart.push({ name, price });
+            updateCart();
+        }
+
+        function updateCart() {
+            const cartContainer = document.getElementById('cart-items');
+            const totalContainer = document.getElementById('total-price');
+            const floatingCount = document.getElementById('floating-count');
+            cartContainer.innerHTML = '';
+            let total = 0;
+            cart.forEach((item, index) => {
+                total += item.price;
+                cartContainer.innerHTML += `
+                    <div class="cart-item">
+                        <span>${item.name}</span>
+                        <span>${item.price} ₽ 
+                            <button onclick="removeFromCart(${index})" style="background:red; color:white; border:none; border-radius:5px; cursor:pointer;">X</button>
+                        </span>
+                    </div>
+                `;
+            });
+            totalContainer.innerText = total;
+            floatingCount.innerText = cart.length;
+
+            const phone = "+79388955155";
+            let message = "Здравствуйте! Хочу оформить заказ в GULÌSTORY:%0A";
+            cart.forEach((item, index) => {
+                message += `${index + 1}. ${item.name} - ${item.price}₽%0A`;
+            });
+            message += `%0AИтого: ${total}₽`;
+            const link = document.getElementById('whatsapp-link');
+            link.href = `https://wa.me/${phone.replace('+', '')}?text=${message}`;
+        }
+
+        function removeFromCart(index) {
+            cart.splice(index, 1);
+            updateCart();
+        }
+    </script>
+</body>
+</html>
