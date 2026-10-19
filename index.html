@@ -203,9 +203,9 @@
     </script>
 
     <script>
-        let products = []; // Старые товары из Firebase
-        let newProducts = []; // Новые (еще не сохраненные) товары
-        let deletedProducts = []; // ID старых товаров, помеченных на удаление
+        let products = []; 
+        let newProducts = []; 
+        let deletedProducts = []; 
         let cart = [];
         const ADMIN_PASSWORD = "Story5155";
         let isFirebaseReady = false;
@@ -311,9 +311,9 @@
             const image = product.image || '';
             
             const idx = isNew ? 'new-' + index : index;
-            const title = isNew ? `Товар ${products.length + index + 1}` : name;
+            // УБРАЛИ НОМЕРА: Если новый товар, просто пишем "Новый товар". Если старый - его название.
+            const title = isNew ? 'Новый товар' : name;
 
-            // Убираем сложные условия в onclick, передаем просто данные
             return `
                 <div class="product-edit" id="edit-block-${idx}">
                     <h3>${title}</h3>
@@ -335,20 +335,16 @@
             `;
         }
 
-        // Универсальная функция удаления, которая смотрит на ID блока
         function handleDelete(idx) {
             if (idx.startsWith('new-')) {
-                // Это новый товар
                 const newIndex = parseInt(idx.replace('new-', ''));
                 if (confirm("Удалить этот новый товар?")) {
                     newProducts.splice(newIndex, 1);
                     const block = document.getElementById('edit-block-' + idx);
                     if (block) block.remove();
-                    // Перерисовываем всех новых, чтобы индексы обновились
                     redrawNewProducts();
                 }
             } else {
-                // Это старый товар из базы
                 const oldIndex = parseInt(idx);
                 const product = products[oldIndex];
                 if (confirm(`Удалить товар "${product.name}" из базы?`)) {
@@ -359,13 +355,10 @@
             }
         }
 
-        // Перерисовка новых товаров (чтобы индексы не съехали после удаления)
         function redrawNewProducts() {
             const list = document.getElementById('admin-products-list');
-            // Удаляем все блоки новых товаров
             list.querySelectorAll('[id^="edit-block-new-"]').forEach(el => el.remove());
             
-            // Заново отрисовываем
             newProducts.forEach((p, index) => {
                 const div = document.createElement('div');
                 div.innerHTML = createProductEditHTML(p, index, true);
@@ -402,13 +395,11 @@
             overlay.classList.add('active');
 
             try {
-                // 1. УДАЛЕНИЕ
                 for (const id of deletedProducts) {
                     loadingText.innerText = `Удаление товара...`;
                     await window.firebaseDeleteDoc(window.firebaseDoc(window.firebaseDB, "products", id));
                 }
 
-                // 2. ОБНОВЛЕНИЕ
                 for (let index = 0; index < products.length; index++) {
                     if (deletedProducts.includes(products[index].id)) continue;
 
@@ -425,7 +416,6 @@
                     });
                 }
 
-                // 3. ДОБАВЛЕНИЕ
                 for (let i = 0; i < newProducts.length; i++) {
                     const idx = 'new-' + i;
                     const newName = document.getElementById('admin-name-' + idx).value;
