@@ -203,9 +203,9 @@
     </script>
 
     <script>
-        let products = [];
-        let newProducts = [];
-        let deletedProducts = [];
+        let products = []; // Старые товары из Firebase
+        let newProducts = []; // Новые (еще не сохраненные) товары
+        let deletedProducts = []; // ID старых товаров, помеченных на удаление
         let cart = [];
         const ADMIN_PASSWORD = "Story5155";
         let isFirebaseReady = false;
@@ -311,13 +311,13 @@
             const image = product.image || '';
             
             const idx = isNew ? 'new-' + index : index;
-            // Если это новый товар, называем его "Товар N" (где N - порядковый номер)
             const title = isNew ? `Товар ${products.length + index + 1}` : name;
 
+            // Убираем сложные условия в onclick, передаем просто данные
             return `
                 <div class="product-edit" id="edit-block-${idx}">
                     <h3>${title}</h3>
-                    <button class="delete-btn" onclick="removeProductRow('${idx}', ${isNew ? index : 'null'}, ${isNew})">Удалить</button>
+                    <button class="delete-btn" onclick="handleDelete('${idx}')">Удалить</button>
                     
                     <label>Название:</label>
                     <input type="text" id="admin-name-${idx}" value="${name}">
@@ -335,20 +335,22 @@
             `;
         }
 
-        // Единая функция удаления (и для старых, и для новых)
-        function removeProductRow(idx, index, isNew) {
-            if (isNew) {
-                // Если это новый товар, просто удаляем его из массива и скрываем блок
+        // Универсальная функция удаления, которая смотрит на ID блока
+        function handleDelete(idx) {
+            if (idx.startsWith('new-')) {
+                // Это новый товар
+                const newIndex = parseInt(idx.replace('new-', ''));
                 if (confirm("Удалить этот новый товар?")) {
-                    newProducts.splice(index, 1);
+                    newProducts.splice(newIndex, 1);
                     const block = document.getElementById('edit-block-' + idx);
                     if (block) block.remove();
-                    // Перенумеровываем оставшиеся новые товары
-                    renumberNewProducts();
+                    // Перерисовываем всех новых, чтобы индексы обновились
+                    redrawNewProducts();
                 }
             } else {
-                // Если старый, помечаем на удаление из базы
-                const product = products[index];
+                // Это старый товар из базы
+                const oldIndex = parseInt(idx);
+                const product = products[oldIndex];
                 if (confirm(`Удалить товар "${product.name}" из базы?`)) {
                     deletedProducts.push(product.id);
                     const block = document.getElementById('edit-block-' + idx);
@@ -357,19 +359,19 @@
             }
         }
 
-        // Перенумерация новых товаров после удаления одного из них
-        function renumberNewProducts() {
+        // Перерисовка новых товаров (чтобы индексы не съехали после удаления)
+        function redrawNewProducts() {
             const list = document.getElementById('admin-products-list');
-            // Находим все блоки новых товаров
-            const newBlocks = list.querySelectorAll('[id^="edit-block-new-"]');
-            let counter = 0;
-            newBlocks.forEach(block => {
-                // Обновляем заголовок
-                const h3 = block.querySelector('h3');
-                if (h3) h3.innerText = `Товар ${products.length + counter + 1}`;
-                counter++;
+            // Удаляем все блоки новых товаров
+            list.querySelectorAll('[id^="edit-block-new-"]').forEach(el => el.remove());
+            
+            // Заново отрисовываем
+            newProducts.forEach((p, index) => {
+                const div = document.createElement('div');
+                div.innerHTML = createProductEditHTML(p, index, true);
+                list.appendChild(div.firstElementChild);
             });
-            newProductCounter = counter;
+            newProductCounter = newProducts.length;
         }
 
         function openUploadSite() {
