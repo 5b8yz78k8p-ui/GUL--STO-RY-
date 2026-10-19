@@ -99,6 +99,8 @@
         .spinner { border: 4px solid rgba(255,255,255,0.3); border-top: 4px solid #e6d5a8; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .loading-text { color: #e6d5a8; font-size: 1.2em; text-align: center; padding: 0 20px; }
+
+        .empty-message { color: #e6d5a8; text-align: center; width: 100%; grid-column: 1 / -1; font-size: 1.2em; margin-top: 20px; }
     </style>
 </head>
 <body>
@@ -226,8 +228,9 @@
             try {
                 const querySnapshot = await window.firebaseGetDocs(window.firebaseCollection(window.firebaseDB, "products"));
                 
+                // УБРАЛИ АВТОМАТИЧЕСКОЕ ДОБАВЛЕНИЕ! Если база пуста, просто показываем сообщение.
                 if (querySnapshot.empty) {
-                    await seedDefaultProducts();
+                    grid.innerHTML = '<p class="empty-message">Товаров пока нет. Зайдите в админ-панель, чтобы добавить их.</p>';
                     return;
                 }
 
@@ -245,21 +248,17 @@
             }
         }
 
-        async function seedDefaultProducts() {
-            const defaults = [
-                { name: "Товар 1", price: 6400, image: "https://i.postimg.cc/1t5xCHSF/e42775bd-ac88-421d-83ad-e4ee13cf133f.jpg", order: 1 },
-                { name: "Товар 2", price: 6400, image: "https://i.postimg.cc/MTsChQZv/9a9427f7-cc7b-4ee0-a2a9-c59b918fab87.jpg", order: 2 }
-            ];
-
-            for (const item of defaults) {
-                await window.firebaseAddDoc(window.firebaseCollection(window.firebaseDB, "products"), item);
-            }
-            loadProductsFromFirebase();
-        }
+        // Функция seedDefaultProducts УДАЛЕНА ПОЛНОСТЬЮ
 
         function renderProducts() {
             const grid = document.getElementById('goods-grid');
             grid.innerHTML = '';
+            
+            if (products.length === 0) {
+                grid.innerHTML = '<p class="empty-message">Товаров пока нет. Зайдите в админ-панель, чтобы добавить их.</p>';
+                return;
+            }
+
             products.forEach(p => {
                 grid.innerHTML += `
                     <div class="card">
@@ -311,7 +310,6 @@
             const image = product.image || '';
             
             const idx = isNew ? 'new-' + index : index;
-            // УБРАЛИ НОМЕРА: Если новый товар, просто пишем "Новый товар". Если старый - его название.
             const title = isNew ? 'Новый товар' : name;
 
             return `
@@ -395,11 +393,13 @@
             overlay.classList.add('active');
 
             try {
+                // 1. УДАЛЕНИЕ
                 for (const id of deletedProducts) {
                     loadingText.innerText = `Удаление товара...`;
                     await window.firebaseDeleteDoc(window.firebaseDoc(window.firebaseDB, "products", id));
                 }
 
+                // 2. ОБНОВЛЕНИЕ
                 for (let index = 0; index < products.length; index++) {
                     if (deletedProducts.includes(products[index].id)) continue;
 
@@ -416,6 +416,7 @@
                     });
                 }
 
+                // 3. ДОБАВЛЕНИЕ
                 for (let i = 0; i < newProducts.length; i++) {
                     const idx = 'new-' + i;
                     const newName = document.getElementById('admin-name-' + idx).value;
