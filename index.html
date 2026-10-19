@@ -228,7 +228,6 @@
             try {
                 const querySnapshot = await window.firebaseGetDocs(window.firebaseCollection(window.firebaseDB, "products"));
                 
-                // УБРАЛИ АВТОМАТИЧЕСКОЕ ДОБАВЛЕНИЕ! Если база пуста, просто показываем сообщение.
                 if (querySnapshot.empty) {
                     grid.innerHTML = '<p class="empty-message">Товаров пока нет. Зайдите в админ-панель, чтобы добавить их.</p>';
                     return;
@@ -248,8 +247,6 @@
             }
         }
 
-        // Функция seedDefaultProducts УДАЛЕНА ПОЛНОСТЬЮ
-
         function renderProducts() {
             const grid = document.getElementById('goods-grid');
             grid.innerHTML = '';
@@ -259,12 +256,12 @@
                 return;
             }
 
-            products.forEach(p => {
+            products.forEach((p, index) => {
                 grid.innerHTML += `
                     <div class="card">
                         <img src="${p.image}" alt="${p.name}" onclick="openModal('${p.image}', ${p.price}, '${p.name}')">
                         <div class="price"><span class="price-value">${p.price}</span> ₽</div>
-                        <button class="add-btn" onclick="addToCart('${p.name}', ${p.price})">Добавить в корзину</button>
+                        <button class="add-btn" onclick="addToCart('Товар ${index + 1}: ${p.name}', ${p.price})">Добавить в корзину</button>
                     </div>
                 `;
             });
@@ -304,13 +301,28 @@
             panel.classList.add('active');
         }
 
+        function getProductNumber(index, isNew) {
+            let counter = 0;
+            for (let i = 0; i < products.length; i++) {
+                if (!deletedProducts.includes(products[i].id)) {
+                    if (i === index && !isNew) return counter + 1;
+                    counter++;
+                }
+            }
+            if (isNew) {
+                return counter + index + 1;
+            }
+            return counter;
+        }
+
         function createProductEditHTML(product, index, isNew) {
             const name = product.name || '';
             const price = product.price || 0;
             const image = product.image || '';
             
             const idx = isNew ? 'new-' + index : index;
-            const title = isNew ? 'Новый товар' : name;
+            const productNumber = getProductNumber(index, isNew);
+            const title = `Товар ${productNumber}`;
 
             return `
                 <div class="product-edit" id="edit-block-${idx}">
@@ -340,29 +352,33 @@
                     newProducts.splice(newIndex, 1);
                     const block = document.getElementById('edit-block-' + idx);
                     if (block) block.remove();
-                    redrawNewProducts();
+                    redrawAllProducts();
                 }
             } else {
                 const oldIndex = parseInt(idx);
                 const product = products[oldIndex];
                 if (confirm(`Удалить товар "${product.name}" из базы?`)) {
                     deletedProducts.push(product.id);
-                    const block = document.getElementById('edit-block-' + idx);
-                    if (block) block.style.display = 'none';
+                    redrawAllProducts();
                 }
             }
         }
 
-        function redrawNewProducts() {
+        function redrawAllProducts() {
             const list = document.getElementById('admin-products-list');
-            list.querySelectorAll('[id^="edit-block-new-"]').forEach(el => el.remove());
+            list.innerHTML = '';
             
+            products.forEach((p, index) => {
+                if (!deletedProducts.includes(p.id)) {
+                    list.innerHTML += createProductEditHTML(p, index, false);
+                }
+            });
+
             newProducts.forEach((p, index) => {
                 const div = document.createElement('div');
                 div.innerHTML = createProductEditHTML(p, index, true);
                 list.appendChild(div.firstElementChild);
             });
-            newProductCounter = newProducts.length;
         }
 
         function openUploadSite() {
@@ -370,14 +386,10 @@
         }
 
         function addNewProductRow() {
-            const list = document.getElementById('admin-products-list');
             const newIndex = newProductCounter++;
             const newProduct = { name: '', price: 0, image: '' };
             newProducts.push(newProduct);
-            
-            const div = document.createElement('div');
-            div.innerHTML = createProductEditHTML(newProduct, newIndex, true);
-            list.appendChild(div.firstElementChild);
+            redrawAllProducts();
         }
 
         function closeAdmin() {
@@ -393,13 +405,11 @@
             overlay.classList.add('active');
 
             try {
-                // 1. УДАЛЕНИЕ
                 for (const id of deletedProducts) {
                     loadingText.innerText = `Удаление товара...`;
                     await window.firebaseDeleteDoc(window.firebaseDoc(window.firebaseDB, "products", id));
                 }
 
-                // 2. ОБНОВЛЕНИЕ
                 for (let index = 0; index < products.length; index++) {
                     if (deletedProducts.includes(products[index].id)) continue;
 
@@ -416,7 +426,6 @@
                     });
                 }
 
-                // 3. ДОБАВЛЕНИЕ
                 for (let i = 0; i < newProducts.length; i++) {
                     const idx = 'new-' + i;
                     const newName = document.getElementById('admin-name-' + idx).value;
@@ -473,7 +482,13 @@
         }
 
         function addToCart(name, price) {
-            cart.push({ name, price });
+            // Проверяем, есть ли уже такой товар в корзине
+            const existingItem = cart.find(item => item.name === name);
+            if (existingItem) {
+                existingItem.quantity += 1;
+            } else {
+                cart.push({ name, price, quantity: 1 });
+            }
             updateCart();
         }
 
@@ -483,24 +498,27 @@
             const floatingCount = document.getElementById('floating-count');
             cartContainer.innerHTML = '';
             let total = 0;
+            let totalQuantity = 0;
+            
             cart.forEach((item, index) => {
-                total += item.price;
+                total += item.price * item.quantity;
+                totalQuantity += item.quantity;
                 cartContainer.innerHTML += `
                     <div class="cart-item">
-                        <span>${item.name}</span>
-                        <span>${item.price} ₽ 
+                        <span>${item.name} (x${item.quantity})</span>
+                        <span>${item.price * item.quantity} ₽ 
                             <button onclick="removeFromCart(${index})" style="background:red; color:white; border:none; border-radius:5px; cursor:pointer;">X</button>
                         </span>
                     </div>
                 `;
             });
             totalContainer.innerText = total;
-            floatingCount.innerText = cart.length;
+            floatingCount.innerText = totalQuantity;
 
             const phone = "+79388955155";
             let message = "Здравствуйте! Хочу оформить заказ в GULÌSTORY:%0A";
             cart.forEach((item, index) => {
-                message += `${index + 1}. ${item.name} - ${item.price}₽%0A`;
+                message += `${index + 1}. ${item.name} (x${item.quantity}) - ${item.price * item.quantity}₽%0A`;
             });
             message += `%0AИтого: ${total}₽`;
             const link = document.getElementById('whatsapp-link');
