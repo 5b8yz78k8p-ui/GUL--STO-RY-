@@ -83,13 +83,12 @@
         .save-btn { background: #25D366; color: white; border: none; padding: 12px; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; margin-top: 20px; width: 100%; }
         .save-btn:hover { background: #128C7E; }
 
-        /* Стили для кнопок добавления/удаления и ссылки */
         .add-new-btn { background: transparent; color: #e6d5a8; border: 2px dashed #e6d5a8; padding: 15px; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 20px; text-align: center; }
         .add-new-btn:hover { background: rgba(230, 213, 168, 0.1); }
+        
         .delete-btn { position: absolute; top: 10px; right: 10px; background: #ff4d4d; color: white; border: none; border-radius: 5px; padding: 5px 10px; cursor: pointer; font-weight: bold; font-size: 0.9em; }
         .delete-btn:hover { background: #cc0000; }
 
-        /* Группа для ввода ссылки и кнопки перехода */
         .link-input-group { display: flex; gap: 10px; align-items: center; }
         .link-input-group input { flex: 1; }
         .open-site-btn { background-color: #e6d5a8; color: #0a2e1f; border: none; padding: 8px 12px; border-radius: 5px; font-size: 0.9em; font-weight: bold; cursor: pointer; white-space: nowrap; }
@@ -212,7 +211,6 @@
         let isFirebaseReady = false;
         let newProductCounter = 0;
 
-        // Ссылка на сайт для загрузки фото (пока Postimages)
         const UPLOAD_SITE_URL = "https://postimages.org/";
 
         document.addEventListener('firebaseReady', () => {
@@ -307,19 +305,19 @@
             panel.classList.add('active');
         }
 
-        // ВОТ ЗДЕСЬ МЫ СДЕЛАЛИ ПОЛЕ ДЛЯ ССЫЛКИ И КНОПКУ ПЕРЕХОДА
         function createProductEditHTML(product, index, isNew) {
             const name = product.name || '';
             const price = product.price || 0;
             const image = product.image || '';
             
             const idx = isNew ? 'new-' + index : index;
-            const title = isNew ? 'Новый товар' : name;
+            // Если это новый товар, называем его "Товар N" (где N - порядковый номер)
+            const title = isNew ? `Товар ${products.length + index + 1}` : name;
 
             return `
                 <div class="product-edit" id="edit-block-${idx}">
                     <h3>${title}</h3>
-                    ${!isNew ? `<button class="delete-btn" onclick="markForDelete(${index})">Удалить</button>` : ''}
+                    <button class="delete-btn" onclick="removeProductRow('${idx}', ${isNew ? index : 'null'}, ${isNew})">Удалить</button>
                     
                     <label>Название:</label>
                     <input type="text" id="admin-name-${idx}" value="${name}">
@@ -337,6 +335,43 @@
             `;
         }
 
+        // Единая функция удаления (и для старых, и для новых)
+        function removeProductRow(idx, index, isNew) {
+            if (isNew) {
+                // Если это новый товар, просто удаляем его из массива и скрываем блок
+                if (confirm("Удалить этот новый товар?")) {
+                    newProducts.splice(index, 1);
+                    const block = document.getElementById('edit-block-' + idx);
+                    if (block) block.remove();
+                    // Перенумеровываем оставшиеся новые товары
+                    renumberNewProducts();
+                }
+            } else {
+                // Если старый, помечаем на удаление из базы
+                const product = products[index];
+                if (confirm(`Удалить товар "${product.name}" из базы?`)) {
+                    deletedProducts.push(product.id);
+                    const block = document.getElementById('edit-block-' + idx);
+                    if (block) block.style.display = 'none';
+                }
+            }
+        }
+
+        // Перенумерация новых товаров после удаления одного из них
+        function renumberNewProducts() {
+            const list = document.getElementById('admin-products-list');
+            // Находим все блоки новых товаров
+            const newBlocks = list.querySelectorAll('[id^="edit-block-new-"]');
+            let counter = 0;
+            newBlocks.forEach(block => {
+                // Обновляем заголовок
+                const h3 = block.querySelector('h3');
+                if (h3) h3.innerText = `Товар ${products.length + counter + 1}`;
+                counter++;
+            });
+            newProductCounter = counter;
+        }
+
         function openUploadSite() {
             window.open(UPLOAD_SITE_URL, '_blank');
         }
@@ -350,15 +385,6 @@
             const div = document.createElement('div');
             div.innerHTML = createProductEditHTML(newProduct, newIndex, true);
             list.appendChild(div.firstElementChild);
-        }
-
-        function markForDelete(index) {
-            const product = products[index];
-            if (confirm(`Удалить товар "${product.name}"?`)) {
-                deletedProducts.push(product.id);
-                const block = document.getElementById('edit-block-' + index);
-                if (block) block.style.display = 'none';
-            }
         }
 
         function closeAdmin() {
