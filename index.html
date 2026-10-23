@@ -19,6 +19,21 @@
   h1 { text-align: center; color: #4a3f8a; margin-bottom: 20px; font-size: 26px; }
   .info { text-align: center; color: #666; margin-bottom: 20px; font-size: 14px; }
 
+  /* --- Переключатель смен --- */
+  .shift-tabs {
+    display: flex; gap: 10px; margin-bottom: 20px;
+    background: #f0f0f8; padding: 6px; border-radius: 12px;
+  }
+  .shift-tab {
+    flex: 1; padding: 12px; border: none; border-radius: 8px;
+    font-size: 16px; font-weight: bold; cursor: pointer;
+    background: transparent; color: #666; transition: all 0.2s;
+  }
+  .shift-tab.active {
+    background: #fff; color: #4a3f8a;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
   .day-block {
     margin-bottom: 15px; padding: 14px; background: #f7f7fb;
     border-radius: 10px; border-left: 4px solid #667eea;
@@ -73,6 +88,13 @@
   .actions { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
   .hidden { display: none !important; }
 
+  /* --- Экран просмотра --- */
+  .view-header {
+    display: flex; align-items: center; gap: 10px; margin-bottom: 15px;
+    border-bottom: 2px solid #eee; padding-bottom: 10px;
+  }
+  .view-header h2 { color: #4a3f8a; font-size: 20px; }
+
   .schedule-card {
     padding: 15px; background: #f7f7fb; border-radius: 10px;
     border-left: 4px solid #764ba2; margin-bottom: 12px;
@@ -109,16 +131,25 @@
 <div class="container">
   <h1>📅 Расписание учителя</h1>
 
+  <!-- КНОПКИ СМЕН -->
+  <div class="shift-tabs">
+    <button class="shift-tab active" id="tab1" onclick="switchShift(1)">1 смена</button>
+    <button class="shift-tab" id="tab2" onclick="switchShift(2)">2 смена</button>
+  </div>
+
   <!-- ПРОСМОТР -->
   <div id="viewScreen" class="hidden">
+    <div class="view-header">
+      <h2 id="viewShiftTitle">1 смена</h2>
+    </div>
     <div id="scheduleView"></div>
     <div class="actions">
       <button class="btn-secondary" id="editBtn">✏️ Изменить</button>
-      <button class="btn-danger" id="resetBtn">🗑️ Сбросить всё</button>
+      <button class="btn-danger" id="resetBtn">🗑️ Сбросить эту смену</button>
     </div>
 
     <div class="share-block">
-      <p>✅ Расписание сохранено. <b>Скопируй ссылку и сохрани её</b> — по ней потом откроется твоё расписание:</p>
+      <p>✅ Расписание сохранено. <b>Скопируй ссылку и сохрани её</b> — в ней обе смены:</p>
       <input type="text" class="share-link" id="shareLink" readonly>
       <button class="btn-copy" id="copyBtn">📋 Скопировать ссылку</button>
     </div>
@@ -126,41 +157,14 @@
 
   <!-- РЕДАКТИРОВАНИЕ -->
   <div id="editScreen">
-    <p class="info">Выбери номер урока, класс, букву и предмет. Нажми «+ Добавить урок», чтобы добавить ещё.</p>
+    <p class="info" id="editInfo">1 смена: выбери номер урока, класс, букву и предмет.</p>
 
-    <div class="day-block" data-day="Понедельник">
-      <h3>Понедельник</h3>
-      <div class="lessons"></div>
-      <button class="add-btn" type="button" onclick="addLesson('Понедельник')">+ Добавить урок</button>
-    </div>
-    <div class="day-block" data-day="Вторник">
-      <h3>Вторник</h3>
-      <div class="lessons"></div>
-      <button class="add-btn" type="button" onclick="addLesson('Вторник')">+ Добавить урок</button>
-    </div>
-    <div class="day-block" data-day="Среда">
-      <h3>Среда</h3>
-      <div class="lessons"></div>
-      <button class="add-btn" type="button" onclick="addLesson('Среда')">+ Добавить урок</button>
-    </div>
-    <div class="day-block" data-day="Четверг">
-      <h3>Четверг</h3>
-      <div class="lessons"></div>
-      <button class="add-btn" type="button" onclick="addLesson('Четверг')">+ Добавить урок</button>
-    </div>
-    <div class="day-block" data-day="Пятница">
-      <h3>Пятница</h3>
-      <div class="lessons"></div>
-      <button class="add-btn" type="button" onclick="addLesson('Пятница')">+ Добавить урок</button>
-    </div>
-    <div class="day-block" data-day="Суббота">
-      <h3>Суббота</h3>
-      <div class="lessons"></div>
-      <button class="add-btn" type="button" onclick="addLesson('Суббота')">+ Добавить урок</button>
+    <div id="editContainer">
+      <!-- дни будут генерироваться скриптом -->
     </div>
 
     <div class="actions">
-      <button class="btn-primary" id="saveBtn">💾 Сохранить расписание</button>
+      <button class="btn-primary" id="saveBtn">💾 Сохранить эту смену</button>
     </div>
   </div>
 </div>
@@ -173,26 +177,39 @@
   const SUBJECTS = ["Чеченский язык","Чеченская литература"];
   const HASH_PREFIX = "#schedule=";
 
+  // Полное расписание: { "1": {...}, "2": {...} }
+  let fullSchedule = { "1": {}, "2": {} };
+  let currentShift = 1;
+
   const editScreen   = document.getElementById("editScreen");
   const viewScreen   = document.getElementById("viewScreen");
   const scheduleView = document.getElementById("scheduleView");
+  const editContainer= document.getElementById("editContainer");
   const shareLink    = document.getElementById("shareLink");
+  const viewShiftTitle = document.getElementById("viewShiftTitle");
+  const editInfo     = document.getElementById("editInfo");
+  const tab1         = document.getElementById("tab1");
+  const tab2         = document.getElementById("tab2");
 
-  /* ---------- Чтение расписания из адресной строки ---------- */
-  function loadSchedule() {
+  /* ---------- Чтение из ссылки ---------- */
+  function loadAll() {
     try {
       if (location.hash.indexOf(HASH_PREFIX) === 0) {
         const raw = location.hash.slice(HASH_PREFIX.length);
-        return JSON.parse(decodeURIComponent(raw));
+        const parsed = JSON.parse(decodeURIComponent(raw));
+        // поддерживаем старый формат (просто дни) — переносим в 1 смену
+        if (parsed["Понедельник"] !== undefined) {
+          return { "1": parsed, "2": {} };
+        }
+        return { "1": parsed["1"] || {}, "2": parsed["2"] || {} };
       }
-    } catch(e) { console.warn("Ошибка чтения из ссылки:", e); }
+    } catch(e) { console.warn("Ошибка чтения ссылки:", e); }
     return null;
   }
 
-  /* ---------- Кодирование расписания в ссылку ---------- */
-  function buildShareLink(schedule) {
+  function buildShareLink() {
     const base = location.origin + location.pathname + location.search;
-    const hash = HASH_PREFIX + encodeURIComponent(JSON.stringify(schedule));
+    const hash = HASH_PREFIX + encodeURIComponent(JSON.stringify(fullSchedule));
     return base + hash;
   }
 
@@ -202,7 +219,36 @@
     return d.innerHTML;
   }
 
-  /* ---------- Один ряд урока ---------- */
+  /* ---------- Переключение смены ---------- */
+  function switchShift(num) {
+    currentShift = num;
+    tab1.classList.toggle("active", num === 1);
+    tab2.classList.toggle("active", num === 2);
+
+    // если сейчас режим просмотра — перерисуем
+    if (!viewScreen.classList.contains("hidden")) {
+      showView();
+    } else {
+      // если режим редактирования — перезаполним форму
+      fillForm();
+    }
+  }
+
+  /* ---------- Построение формы ---------- */
+  function buildEditDays() {
+    editContainer.innerHTML = "";
+    DAYS.forEach(day => {
+      const block = document.createElement("div");
+      block.className = "day-block";
+      block.setAttribute("data-day", day);
+      block.innerHTML =
+        "<h3>" + day + "</h3>" +
+        '<div class="lessons"></div>' +
+        '<button class="add-btn" type="button" onclick="addLesson(\'' + day + '\')">+ Добавить урок</button>';
+      editContainer.appendChild(block);
+    });
+  }
+
   function buildLessonRow(lessonNum, grade, letter, subject, num) {
     const row = document.createElement("div");
     row.className = "lesson-row";
@@ -211,7 +257,6 @@
     numBadge.className = "num-badge";
     numBadge.textContent = num + ".";
 
-    // номер урока (1-8)
     const lessonNumSel = document.createElement("select");
     lessonNumSel.className = "lesson-number-select";
     LESSON_NUMBERS.forEach(n => {
@@ -221,7 +266,6 @@
       lessonNumSel.appendChild(o);
     });
 
-    // класс
     const gradeSel = document.createElement("select");
     gradeSel.className = "grade-select";
     GRADES.forEach(g => {
@@ -231,7 +275,6 @@
       gradeSel.appendChild(o);
     });
 
-    // буква
     const letterSel = document.createElement("select");
     letterSel.className = "letter-select";
     LETTERS.forEach(l => {
@@ -241,7 +284,6 @@
       letterSel.appendChild(o);
     });
 
-    // предмет
     const subjSel = document.createElement("select");
     subjSel.className = "subject-select";
     SUBJECTS.forEach(s => {
@@ -278,13 +320,10 @@
   }
 
   function addLesson(day, lessonNum, grade, letter, subject) {
-    const block = document.querySelector('.day-block[data-day="' + day + '"]');
+    const block = editContainer.querySelector('.day-block[data-day="' + day + '"]');
     const lessonsDiv = block.querySelector(".lessons");
     const num = lessonsDiv.querySelectorAll(".lesson-row").length + 1;
-
-    // по умолчанию номер урока совпадает с порядком
     const defaultLessonNum = lessonNum || LESSON_NUMBERS[(num - 1) % LESSON_NUMBERS.length];
-
     const row = buildLessonRow(
       defaultLessonNum,
       grade || GRADES[0],
@@ -295,24 +334,26 @@
     lessonsDiv.appendChild(row);
   }
 
-  function fillForm(schedule) {
+  function fillForm() {
+    const schedule = fullSchedule[currentShift] || {};
     DAYS.forEach(day => {
-      const block = document.querySelector('.day-block[data-day="' + day + '"]');
+      const block = editContainer.querySelector('.day-block[data-day="' + day + '"]');
       const lessonsDiv = block.querySelector(".lessons");
       lessonsDiv.innerHTML = "";
-      const arr = (schedule && schedule[day]) ? schedule[day] : [];
+      const arr = schedule[day] || [];
       if (arr.length === 0) {
         addLesson(day);
       } else {
         arr.forEach(l => addLesson(day, l.lessonNum, l.grade, l.letter || "А", l.subject));
       }
     });
+    editInfo.textContent = currentShift + " смена: выбери номер урока, класс, букву и предмет.";
   }
 
   function collectForm() {
     const schedule = {};
     DAYS.forEach(day => {
-      const block = document.querySelector('.day-block[data-day="' + day + '"]');
+      const block = editContainer.querySelector('.day-block[data-day="' + day + '"]');
       const lessons = [];
       block.querySelectorAll(".lesson-row").forEach(r => {
         const lessonNum = r.querySelector(".lesson-number-select").value;
@@ -320,23 +361,19 @@
         const letter    = r.querySelector(".letter-select").value;
         const subject   = r.querySelector(".subject-select").value;
         if (lessonNum && grade && letter && subject) {
-          lessons.push({
-            lessonNum: lessonNum,
-            grade: grade,
-            letter: letter,
-            subject: subject
-          });
+          lessons.push({ lessonNum, grade, letter, subject });
         }
       });
-      // сортируем уроки по номеру (1, 2, 3...)
       lessons.sort((a, b) => Number(a.lessonNum) - Number(b.lessonNum));
       schedule[day] = lessons;
     });
     return schedule;
   }
 
+  /* ---------- Просмотр ---------- */
   function showView() {
-    const schedule = loadSchedule() || {};
+    const schedule = fullSchedule[currentShift] || {};
+    viewShiftTitle.textContent = currentShift + " смена";
     scheduleView.innerHTML = "";
 
     DAYS.forEach(day => {
@@ -358,23 +395,23 @@
       scheduleView.appendChild(card);
     });
 
-    shareLink.value = buildShareLink(schedule);
+    shareLink.value = buildShareLink();
 
     viewScreen.classList.remove("hidden");
     editScreen.classList.add("hidden");
   }
 
   function showEdit() {
-    const schedule = loadSchedule();
-    fillForm(schedule);
+    fillForm();
     viewScreen.classList.add("hidden");
     editScreen.classList.remove("hidden");
   }
 
+  /* ---------- Кнопки ---------- */
   document.getElementById("saveBtn").addEventListener("click", () => {
-    const data = collectForm();
+    fullSchedule[currentShift] = collectForm();
     try {
-      history.replaceState(null, "", HASH_PREFIX + encodeURIComponent(JSON.stringify(data)));
+      history.replaceState(null, "", HASH_PREFIX + encodeURIComponent(JSON.stringify(fullSchedule)));
     } catch(e) { console.warn("Не удалось обновить адрес:", e); }
     showView();
   });
@@ -382,8 +419,11 @@
   document.getElementById("editBtn").addEventListener("click", showEdit);
 
   document.getElementById("resetBtn").addEventListener("click", () => {
-    if (confirm("Точно удалить всё расписание?")) {
-      try { history.replaceState(null, "", location.pathname); } catch(e) {}
+    if (confirm("Удалить расписание только для " + currentShift + " смены?")) {
+      fullSchedule[currentShift] = {};
+      try {
+        history.replaceState(null, "", HASH_PREFIX + encodeURIComponent(JSON.stringify(fullSchedule)));
+      } catch(e) {}
       showEdit();
     }
   });
@@ -393,16 +433,21 @@
     shareLink.setSelectionRange(0, 99999);
     try {
       document.execCommand("copy");
-      alert("Ссылка скопирована ✓");
+      alert("Ссылка скопирована ✓ (в ней обе смены)");
     } catch(e) {
       alert("Не получилось, скопируй вручную");
     }
   });
 
   /* ---------- Запуск ---------- */
-  const saved = loadSchedule();
-  if (saved) showView();
-  else showEdit();
+  buildEditDays();
+  const saved = loadAll();
+  if (saved) {
+    fullSchedule = saved;
+    showView();
+  } else {
+    fillForm();
+  }
 </script>
 </body>
 </html>
