@@ -1,534 +1,408 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GULÌSTORY</title>
-    <style>
-        body { font-family: 'Georgia', serif; background: linear-gradient(135deg, #0a2e1f 0%, #1a4a2e 50%, #0a2e1f 100%); color: #f5f5dc; margin: 0; padding: 20px; overflow-x: hidden; position: relative; min-height: 100vh; }
-        
-        .flower-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; opacity: 0.8; }
-        .flower { position: absolute; background: radial-gradient(circle, #ffffff 20%, transparent 20%), radial-gradient(circle, #ffffff 20%, transparent 20%), radial-gradient(circle, #ffffff 20%, transparent 20%), radial-gradient(circle, #ffffff 20%, transparent 20%), radial-gradient(circle, #ffffff 20%, transparent 20%); background-size: 10px 10px; background-position: 0 0, 10px 0, 5px -5px, -5px -5px, 0 -10px; border-radius: 50%; animation: float 10s infinite ease-in-out; }
-        .flower:nth-child(1) { width: 40px; height: 40px; top: 10%; left: 5%; }
-        .flower:nth-child(2) { width: 25px; height: 25px; top: 60%; left: 90%; animation-delay: 2s; }
-        .flower:nth-child(3) { width: 30px; height: 30px; top: 80%; left: 15%; animation-delay: 4s; }
-        .flower:nth-child(4) { width: 20px; height: 20px; top: 30%; left: 80%; animation-delay: 6s; }
-        .flower:nth-child(5) { width: 50px; height: 50px; top: 5%; right: 10%; animation-delay: 8s; }
-        .flower:nth-child(6) { width: 35px; height: 35px; top: 45%; left: 50%; animation-delay: 1s; }
-        @keyframes float { 0%, 100% { transform: translateY(0) rotate(0deg); } 50% { transform: translateY(-20px) rotate(45deg); } }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Расписание учителя</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    min-height: 100vh; padding: 20px; color: #333;
+  }
+  .container {
+    max-width: 950px; margin: 0 auto; background: #fff;
+    border-radius: 16px; padding: 25px;
+    box-shadow: 0 20px 50px rgba(0,0,0,0.25);
+  }
+  h1 { text-align: center; color: #4a3f8a; margin-bottom: 20px; font-size: 26px; }
+  .info { text-align: center; color: #666; margin-bottom: 20px; font-size: 14px; }
 
-        body.modal-open { overflow: hidden; }
+  .day-block {
+    margin-bottom: 15px; padding: 14px; background: #f7f7fb;
+    border-radius: 10px; border-left: 4px solid #667eea;
+  }
+  .day-block h3 { color: #4a3f8a; margin-bottom: 10px; font-size: 17px; }
+  .lesson-row {
+    display: flex; gap: 6px; margin-bottom: 8px; align-items: center;
+    flex-wrap: wrap;
+  }
+  .num-badge { font-weight: bold; color: #764ba2; min-width: 20px; text-align: center; }
+  select {
+    padding: 8px 8px; border: 2px solid #ddd; border-radius: 8px;
+    font-size: 13px; font-family: inherit; background: #fff; cursor: pointer;
+  }
+  select:focus { outline: none; border-color: #667eea; }
+  .lesson-number-select { flex: 0.9; min-width: 95px; }
+  .grade-select         { flex: 0.9; min-width: 95px; }
+  .letter-select        { flex: 0.5; min-width: 60px; }
+  .subject-select       { flex: 1.4; min-width: 135px; }
 
-        header { text-align: center; margin-bottom: 30px; position: relative; z-index: 1; }
-        h1 { color: #e6d5a8; letter-spacing: 4px; text-transform: uppercase; font-size: 2.5em; border-bottom: 2px solid #e6d5a8; display: inline-block; padding-bottom: 10px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
-        header p { color: #f5f5dc; font-size: 1.2em; margin-top: 10px; }
+  .remove-btn {
+    background: #ff5757; color: #fff; border: none;
+    width: 30px; height: 30px; border-radius: 8px;
+    font-size: 17px; font-weight: bold; cursor: pointer; line-height: 1;
+    flex-shrink: 0;
+  }
+  .add-btn {
+    background: #eef0ff; color: #4a3f8a; border: none;
+    padding: 8px 14px; border-radius: 8px; font-size: 13px;
+    font-weight: bold; cursor: pointer; margin-top: 4px;
+  }
+  .add-btn:hover { background: #dfe3ff; }
 
-        .floating-cart { position: fixed; top: 20px; right: 20px; z-index: 100; background: rgba(10, 46, 31, 0.95); border: 2px solid #e6d5a8; border-radius: 16px; padding: 10px 15px; text-align: center; transition: 0.3s; cursor: pointer; }
-        .floating-cart:hover { border-color: #ffffff; }
-        .floating-cart-text { color: #e6d5a8; font-size: 1.2em; font-weight: bold; letter-spacing: 1px; }
-        .floating-cart-icon { font-size: 0.9em; color: #e6d5a8; }
-        .floating-cart-count { font-size: 1em; color: #0a2e1f; background: #e6d5a8; border-radius: 50%; padding: 2px 8px; position: absolute; top: -5px; right: -5px; }
+  button { font-family: inherit; }
+  .btn-primary {
+    padding: 12px 24px; font-size: 16px; border: none;
+    border-radius: 8px; cursor: pointer; font-weight: bold;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: #fff; width: 100%;
+    box-shadow: 0 4px 15px rgba(102,126,234,0.4);
+  }
+  .btn-secondary {
+    padding: 12px 24px; font-size: 16px; border: none;
+    border-radius: 8px; cursor: pointer; font-weight: bold;
+    background: #eee; color: #4a3f8a; margin-right: 10px;
+  }
+  .btn-danger {
+    padding: 12px 24px; font-size: 16px; border: none;
+    border-radius: 8px; cursor: pointer; font-weight: bold;
+    background: #ff5757; color: #fff;
+  }
+  .actions { margin-top: 20px; display: flex; gap: 10px; flex-wrap: wrap; }
+  .hidden { display: none !important; }
 
-        .floating-admin { position: fixed; top: 20px; left: 20px; z-index: 100; background: rgba(10, 46, 31, 0.95); border: 2px solid #e6d5a8; border-radius: 16px; padding: 10px 15px; text-align: center; transition: 0.3s; cursor: pointer; }
-        .floating-admin:hover { border-color: #ffffff; }
-        .floating-admin-text { color: #e6d5a8; font-size: 1.2em; font-weight: bold; letter-spacing: 1px; }
+  .schedule-card {
+    padding: 15px; background: #f7f7fb; border-radius: 10px;
+    border-left: 4px solid #764ba2; margin-bottom: 12px;
+  }
+  .schedule-card h3 { color: #4a3f8a; margin-bottom: 8px; font-size: 17px; }
+  .schedule-card ul { list-style: none; }
+  .schedule-card li {
+    padding: 8px 0 8px 22px; position: relative;
+    border-bottom: 1px dashed #ddd; font-size: 15px;
+  }
+  .schedule-card li:last-child { border-bottom: none; }
+  .schedule-card li::before { content: "📘"; position: absolute; left: 0; }
+  .lesson-label { font-weight: bold; color: #4a3f8a; }
+  .empty { color: #999; font-style: italic; padding-left: 0 !important; }
+  .empty::before { content: "" !important; }
 
-        .cart-dropdown { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000; background: rgba(10, 46, 31, 0.98); border: 2px solid #e6d5a8; border-radius: 16px; padding: 20px; max-width: 250px; width: 80%; display: none; }
-        .cart-dropdown.active { display: flex; flex-direction: column; }
-        .cart-dropdown h2 { color: #e6d5a8; border-bottom: 2px solid #e6d5a8; padding-bottom: 10px; }
-        .cart-item { display: flex; justify-content: space-between; margin-bottom: 10px; border-bottom: 1px solid rgba(230, 213, 168, 0.3); padding-bottom: 5px; color: #f5f5dc; }
-        .total { font-size: 1.5em; font-weight: bold; color: #e6d5a8; text-align: right; margin-top: 20px; }
-        .whatsapp-btn { display: block; background-color: #25D366; color: white; text-decoration: none; padding: 15px; text-align: center; border-radius: 30px; font-size: 1.2em; margin-top: 20px; font-weight: bold; }
-        .whatsapp-btn:hover { background-color: #128C7E; }
-        .close-cart { background: #ff4d4d; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 16px; cursor: pointer; position: absolute; top: 10px; right: 10px; }
-
-        .goods-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 25px; max-width: 1000px; margin: 0 auto; position: relative; z-index: 1; }
-        .card { background: rgba(10, 46, 31, 0.9); border: 2px solid #e6d5a8; border-radius: 16px; padding: 20px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); text-align: center; transition: 0.4s; }
-        .card:hover { border-color: #ffffff; transform: translateY(-8px); box-shadow: 0 16px 32px rgba(230, 213, 168, 0.3); }
-        .card img { max-width: 100%; border-radius: 12px; height: 200px; object-fit: cover; margin-bottom: 15px; border: 1px solid #e6d5a8; cursor: pointer; }
-        .card img:hover { transform: scale(1.03); }
-        .price { color: #e6d5a8; font-weight: bold; font-size: 1.4em; margin: 10px 0; text-shadow: 1px 1px 2px rgba(0,0,0,0.5); }
-        .add-btn { background-color: #e6d5a8; color: #0a2e1f; border: none; padding: 12px 20px; border-radius: 20px; cursor: pointer; font-size: 16px; width: 100%; font-weight: bold; letter-spacing: 1px; }
-        .add-btn:hover { background-color: #ffffff; color: #0a2e1f; transform: scale(1.03); }
-
-        .modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 1000; }
-        .modal.active { display: flex; }
-        .modal-content { background: rgba(10, 46, 31, 0.95); border: 2px solid #e6d5a8; border-radius: 16px; padding: 25px; text-align: center; max-width: 450px; width: 90%; position: relative; }
-        .modal-content img { max-width: 100%; max-height: 50vh; border-radius: 12px; object-fit: contain; border: 1px solid #e6d5a8; }
-        .modal-price { color: #e6d5a8; font-weight: bold; font-size: 1.8em; margin: 15px 0; }
-        .modal-btn { background-color: #e6d5a8; color: #0a2e1f; border: none; padding: 12px 20px; border-radius: 20px; cursor: pointer; font-size: 16px; width: 100%; font-weight: bold; }
-        .modal-btn:hover { background-color: #ffffff; color: #0a2e1f; }
-        .close-modal { background: #ff4d4d; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 16px; cursor: pointer; position: absolute; top: 10px; right: 10px; }
-
-        .auth-modal { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.85); display: none; justify-content: center; align-items: center; z-index: 2000; }
-        .auth-modal.active { display: flex; }
-        .auth-content { background: rgba(10, 46, 31, 0.95); border: 2px solid #e6d5a8; border-radius: 16px; padding: 25px; text-align: center; max-width: 350px; width: 90%; position: relative; }
-        .auth-content input { width: 100%; padding: 12px; margin: 15px 0; border-radius: 10px; border: 1px solid #e6d5a8; background: #0a2e1f; color: #fff; box-sizing: border-box; font-size: 1em; text-align: center; }
-        .auth-btn { background-color: #e6d5a8; color: #0a2e1f; border: none; padding: 12px 20px; border-radius: 20px; cursor: pointer; font-size: 16px; width: 100%; font-weight: bold; }
-        .auth-btn:hover { background-color: #ffffff; }
-
-        .admin-panel { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.95); display: none; justify-content: center; align-items: flex-start; z-index: 3000; overflow-y: auto; padding: 20px 0; }
-        .admin-panel.active { display: flex; }
-        .admin-content { background: rgba(10, 46, 31, 0.98); border: 2px solid #e6d5a8; border-radius: 16px; padding: 20px; max-width: 800px; width: 95%; position: relative; margin: 20px; }
-        .admin-content h2 { color: #e6d5a8; text-align: center; margin-top: 0; border-bottom: 2px solid #e6d5a8; padding-bottom: 10px; }
-        .admin-close { position: absolute; top: 10px; right: 15px; background: #ff4d4d; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 16px; cursor: pointer; }
-        
-        .product-edit { background: rgba(255,255,255,0.05); border: 1px solid rgba(230, 213, 168, 0.3); border-radius: 10px; padding: 15px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; position: relative; }
-        .product-edit h3 { color: #e6d5a8; margin: 0; font-size: 1.1em; padding-right: 80px; }
-        .product-edit label { font-size: 0.9em; color: #aaa; margin-bottom: -5px; }
-        .product-edit input { padding: 8px; border-radius: 5px; border: 1px solid #e6d5a8; background: #0a2e1f; color: #fff; width: 100%; box-sizing: border-box; }
-        
-        .preview-img { max-width: 100px; max-height: 100px; object-fit: cover; border-radius: 5px; border: 1px solid #e6d5a8; margin-top: 5px; }
-
-        .save-btn { background: #25D366; color: white; border: none; padding: 12px; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; margin-top: 20px; width: 100%; }
-        .save-btn:hover { background: #128C7E; }
-
-        .add-new-btn { background: transparent; color: #e6d5a8; border: 2px dashed #e6d5a8; padding: 15px; border-radius: 10px; font-size: 1.1em; font-weight: bold; cursor: pointer; width: 100%; margin-bottom: 20px; text-align: center; }
-        .add-new-btn:hover { background: rgba(230, 213, 168, 0.1); }
-        
-        .delete-btn { position: absolute; top: 10px; right: 10px; background: #ff4d4d; color: white; border: none; border-radius: 5px; padding: 5px 10px; cursor: pointer; font-weight: bold; font-size: 0.9em; }
-        .delete-btn:hover { background: #cc0000; }
-
-        .link-input-group { display: flex; gap: 10px; align-items: center; }
-        .link-input-group input { flex: 1; }
-        .open-site-btn { background-color: #e6d5a8; color: #0a2e1f; border: none; padding: 8px 12px; border-radius: 5px; font-size: 0.9em; font-weight: bold; cursor: pointer; white-space: nowrap; }
-        .open-site-btn:hover { background-color: #ffffff; }
-
-        .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 4000; flex-direction: column; }
-        .loading-overlay.active { display: flex; }
-        .spinner { border: 4px solid rgba(255,255,255,0.3); border-top: 4px solid #e6d5a8; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 15px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .loading-text { color: #e6d5a8; font-size: 1.2em; text-align: center; padding: 0 20px; }
-
-        .empty-message { color: #e6d5a8; text-align: center; width: 100%; grid-column: 1 / -1; font-size: 1.2em; margin-top: 20px; }
-    </style>
+  .share-block {
+    margin-top: 20px; padding: 15px; background: #eef7ff;
+    border-radius: 10px; border-left: 4px solid #3399ff; font-size: 14px;
+  }
+  .share-block p { margin-bottom: 10px; color: #1a4f7a; }
+  .share-link {
+    width: 100%; padding: 10px; border: 2px solid #bcd9f2; border-radius: 8px;
+    font-size: 12px; font-family: monospace; background: #fff; margin-bottom: 10px;
+  }
+  .btn-copy {
+    padding: 10px 20px; font-size: 14px; border: none;
+    border-radius: 8px; cursor: pointer; font-weight: bold;
+    background: #3399ff; color: #fff;
+  }
+</style>
 </head>
 <body>
-    <div class="flower-bg">
-        <div class="flower"></div>
-        <div class="flower"></div>
-        <div class="flower"></div>
-        <div class="flower"></div>
-        <div class="flower"></div>
-        <div class="flower"></div>
+<div class="container">
+  <h1>📅 Расписание учителя</h1>
+
+  <!-- ПРОСМОТР -->
+  <div id="viewScreen" class="hidden">
+    <div id="scheduleView"></div>
+    <div class="actions">
+      <button class="btn-secondary" id="editBtn">✏️ Изменить</button>
+      <button class="btn-danger" id="resetBtn">🗑️ Сбросить всё</button>
     </div>
 
-    <header>
-        <h1>GULÌSTORY</h1>
-        <p>Будь у себя в приоритете</p>
-    </header>
+    <div class="share-block">
+      <p>✅ Расписание сохранено. <b>Скопируй ссылку и сохрани её</b> — по ней потом откроется твоё расписание:</p>
+      <input type="text" class="share-link" id="shareLink" readonly>
+      <button class="btn-copy" id="copyBtn">📋 Скопировать ссылку</button>
+    </div>
+  </div>
 
-    <div class="floating-admin" onclick="openAuth()">
-        <span class="floating-admin-text">Админ ⚙️</span>
+  <!-- РЕДАКТИРОВАНИЕ -->
+  <div id="editScreen">
+    <p class="info">Выбери номер урока, класс, букву и предмет. Нажми «+ Добавить урок», чтобы добавить ещё.</p>
+
+    <div class="day-block" data-day="Понедельник">
+      <h3>Понедельник</h3>
+      <div class="lessons"></div>
+      <button class="add-btn" type="button" onclick="addLesson('Понедельник')">+ Добавить урок</button>
+    </div>
+    <div class="day-block" data-day="Вторник">
+      <h3>Вторник</h3>
+      <div class="lessons"></div>
+      <button class="add-btn" type="button" onclick="addLesson('Вторник')">+ Добавить урок</button>
+    </div>
+    <div class="day-block" data-day="Среда">
+      <h3>Среда</h3>
+      <div class="lessons"></div>
+      <button class="add-btn" type="button" onclick="addLesson('Среда')">+ Добавить урок</button>
+    </div>
+    <div class="day-block" data-day="Четверг">
+      <h3>Четверг</h3>
+      <div class="lessons"></div>
+      <button class="add-btn" type="button" onclick="addLesson('Четверг')">+ Добавить урок</button>
+    </div>
+    <div class="day-block" data-day="Пятница">
+      <h3>Пятница</h3>
+      <div class="lessons"></div>
+      <button class="add-btn" type="button" onclick="addLesson('Пятница')">+ Добавить урок</button>
+    </div>
+    <div class="day-block" data-day="Суббота">
+      <h3>Суббота</h3>
+      <div class="lessons"></div>
+      <button class="add-btn" type="button" onclick="addLesson('Суббота')">+ Добавить урок</button>
     </div>
 
-    <div class="floating-cart" onclick="openCart()">
-        <span class="floating-cart-text">Корзина</span>
-        <span class="floating-cart-icon">🛒</span>
-        <div class="floating-cart-count" id="floating-count">0</div>
+    <div class="actions">
+      <button class="btn-primary" id="saveBtn">💾 Сохранить расписание</button>
     </div>
+  </div>
+</div>
 
-    <div class="cart-dropdown" id="cart-dropdown">
-        <button class="close-cart" onclick="closeCart()">X</button>
-        <h2>🛒 Ваша корзина</h2>
-        <div id="cart-items" class="cart-items-scroll"></div>
-        <div class="total">Итого: <span id="total-price">0</span> ₽</div>
-        <a href="#" id="whatsapp-link" class="whatsapp-btn" target="_blank">Оформить в WhatsApp 📲</a>
-    </div>
+<script>
+  const DAYS = ["Понедельник","Вторник","Среда","Четверг","Пятница","Суббота"];
+  const LESSON_NUMBERS = ["1","2","3","4","5","6","7","8"];
+  const GRADES = ["5","6","7","8","9","10","11"];
+  const LETTERS = ["А","Б","В","Г"];
+  const SUBJECTS = ["Чеченский язык","Чеченская литература"];
+  const HASH_PREFIX = "#schedule=";
 
-    <div class="goods-grid" id="goods-grid">
-        <p style="color:#e6d5a8; text-align:center; width:100%; grid-column: 1 / -1;">Загрузка товаров...</p>
-    </div>
+  const editScreen   = document.getElementById("editScreen");
+  const viewScreen   = document.getElementById("viewScreen");
+  const scheduleView = document.getElementById("scheduleView");
+  const shareLink    = document.getElementById("shareLink");
 
-    <div class="modal" id="modal" onclick="closeModal()">
-        <div class="modal-content" onclick="event.stopPropagation()">
-            <button class="close-modal" onclick="closeModal()">X</button>
-            <img id="modal-image" src="" alt="Фото товара">
-            <div class="modal-price" id="modal-price"></div>
-            <button class="modal-btn" id="modal-add-btn">Добавить в корзину</button>
-        </div>
-    </div>
+  /* ---------- Чтение расписания из адресной строки ---------- */
+  function loadSchedule() {
+    try {
+      if (location.hash.indexOf(HASH_PREFIX) === 0) {
+        const raw = location.hash.slice(HASH_PREFIX.length);
+        return JSON.parse(decodeURIComponent(raw));
+      }
+    } catch(e) { console.warn("Ошибка чтения из ссылки:", e); }
+    return null;
+  }
 
-    <div class="auth-modal" id="auth-modal">
-        <div class="auth-content">
-            <h3 style="color:#e6d5a8; margin-top:0;">Вход в админ-панель</h3>
-            <input type="password" id="admin-password" placeholder="Введите пароль...">
-            <button class="auth-btn" onclick="checkPassword()">Войти</button>
-            <button class="auth-btn" style="background:#ff4d4d; color:white; margin-top:10px;" onclick="closeAuth()">Отмена</button>
-        </div>
-    </div>
+  /* ---------- Кодирование расписания в ссылку ---------- */
+  function buildShareLink(schedule) {
+    const base = location.origin + location.pathname + location.search;
+    const hash = HASH_PREFIX + encodeURIComponent(JSON.stringify(schedule));
+    return base + hash;
+  }
 
-    <div class="admin-panel" id="admin-panel">
-        <div class="admin-content">
-            <button class="admin-close" onclick="closeAdmin()">X</button>
-            <h2>Управление товарами</h2>
-            
-            <button class="add-new-btn" onclick="addNewProductRow()">+ Добавить новый товар</button>
-            
-            <div id="admin-products-list"></div>
-            <button class="save-btn" onclick="saveAdminChanges()">Сохранить все изменения</button>
-        </div>
-    </div>
+  function escapeHtml(str) {
+    const d = document.createElement("div");
+    d.textContent = str == null ? "" : str;
+    return d.innerHTML;
+  }
 
-    <div class="loading-overlay" id="loading-overlay">
-        <div class="spinner"></div>
-        <div class="loading-text" id="loading-text">Загрузка...</div>
-    </div>
+  /* ---------- Один ряд урока ---------- */
+  function buildLessonRow(lessonNum, grade, letter, subject, num) {
+    const row = document.createElement("div");
+    row.className = "lesson-row";
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, getDocs, doc, addDoc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+    const numBadge = document.createElement("span");
+    numBadge.className = "num-badge";
+    numBadge.textContent = num + ".";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBQABRSfd8HGHrabbXyqhN1KN-_mS8G-8Y",
-            authDomain: "gulistory.firebaseapp.com",
-            projectId: "gulistory",
-            storageBucket: "gulistory.firebasestorage.app",
-            messagingSenderId: "518381931530",
-            appId: "1:518381931530:web:37c847433217e06f4ca3f3",
-            measurementId: "G-4G34PENK9Y"
-        };
+    // номер урока (1-8)
+    const lessonNumSel = document.createElement("select");
+    lessonNumSel.className = "lesson-number-select";
+    LESSON_NUMBERS.forEach(n => {
+      const o = document.createElement("option");
+      o.value = n; o.textContent = n + " урок";
+      if (n === lessonNum) o.selected = true;
+      lessonNumSel.appendChild(o);
+    });
 
-        const app = initializeApp(firebaseConfig);
-        const db = getFirestore(app);
+    // класс
+    const gradeSel = document.createElement("select");
+    gradeSel.className = "grade-select";
+    GRADES.forEach(g => {
+      const o = document.createElement("option");
+      o.value = g; o.textContent = g + " класс";
+      if (g === grade) o.selected = true;
+      gradeSel.appendChild(o);
+    });
 
-        window.firebaseDB = db;
-        window.firebaseCollection = collection;
-        window.firebaseGetDocs = getDocs;
-        window.firebaseDoc = doc;
-        window.firebaseAddDoc = addDoc;
-        window.firebaseUpdateDoc = updateDoc;
-        window.firebaseDeleteDoc = deleteDoc;
+    // буква
+    const letterSel = document.createElement("select");
+    letterSel.className = "letter-select";
+    LETTERS.forEach(l => {
+      const o = document.createElement("option");
+      o.value = l; o.textContent = l;
+      if (l === letter) o.selected = true;
+      letterSel.appendChild(o);
+    });
 
-        window.firebaseReady = true;
-        document.dispatchEvent(new Event('firebaseReady'));
-    </script>
+    // предмет
+    const subjSel = document.createElement("select");
+    subjSel.className = "subject-select";
+    SUBJECTS.forEach(s => {
+      const o = document.createElement("option");
+      o.value = s; o.textContent = s;
+      if (s === subject) o.selected = true;
+      subjSel.appendChild(o);
+    });
 
-    <script>
-        let products = []; 
-        let newProducts = []; 
-        let deletedProducts = []; 
-        let cart = [];
-        const ADMIN_PASSWORD = "Story5155";
-        let isFirebaseReady = false;
-        let newProductCounter = 0;
+    const removeBtn = document.createElement("button");
+    removeBtn.type = "button";
+    removeBtn.className = "remove-btn";
+    removeBtn.textContent = "×";
+    removeBtn.onclick = () => {
+      const parent = row.parentElement;
+      row.remove();
+      renumberDay(parent);
+    };
 
-        const UPLOAD_SITE_URL = "https://postimages.org/";
+    row.appendChild(numBadge);
+    row.appendChild(lessonNumSel);
+    row.appendChild(gradeSel);
+    row.appendChild(letterSel);
+    row.appendChild(subjSel);
+    row.appendChild(removeBtn);
+    return row;
+  }
 
-        document.addEventListener('firebaseReady', () => {
-            isFirebaseReady = true;
-            loadProductsFromFirebase();
-        });
+  function renumberDay(container) {
+    if (!container) return;
+    container.querySelectorAll(".lesson-row").forEach((r, i) => {
+      r.querySelector(".num-badge").textContent = (i + 1) + ".";
+    });
+  }
 
-        async function loadProductsFromFirebase() {
-            if (!isFirebaseReady) return;
-            const grid = document.getElementById('goods-grid');
-            grid.innerHTML = '<p style="color:#e6d5a8; text-align:center; width:100%; grid-column: 1 / -1;">Загрузка товаров...</p>';
+  function addLesson(day, lessonNum, grade, letter, subject) {
+    const block = document.querySelector('.day-block[data-day="' + day + '"]');
+    const lessonsDiv = block.querySelector(".lessons");
+    const num = lessonsDiv.querySelectorAll(".lesson-row").length + 1;
 
-            try {
-                const querySnapshot = await window.firebaseGetDocs(window.firebaseCollection(window.firebaseDB, "products"));
-                
-                if (querySnapshot.empty) {
-                    grid.innerHTML = '<p class="empty-message">Товаров пока нет. Зайдите в админ-панель, чтобы добавить их.</p>';
-                    return;
-                }
+    // по умолчанию номер урока совпадает с порядком
+    const defaultLessonNum = lessonNum || LESSON_NUMBERS[(num - 1) % LESSON_NUMBERS.length];
 
-                products = [];
-                querySnapshot.forEach((doc) => {
-                    products.push({ id: doc.id, ...doc.data() });
-                });
+    const row = buildLessonRow(
+      defaultLessonNum,
+      grade || GRADES[0],
+      letter || LETTERS[0],
+      subject || SUBJECTS[0],
+      num
+    );
+    lessonsDiv.appendChild(row);
+  }
 
-                products.sort((a, b) => (a.order || 0) - (b.order || 0));
-                renderProducts();
+  function fillForm(schedule) {
+    DAYS.forEach(day => {
+      const block = document.querySelector('.day-block[data-day="' + day + '"]');
+      const lessonsDiv = block.querySelector(".lessons");
+      lessonsDiv.innerHTML = "";
+      const arr = (schedule && schedule[day]) ? schedule[day] : [];
+      if (arr.length === 0) {
+        addLesson(day);
+      } else {
+        arr.forEach(l => addLesson(day, l.lessonNum, l.grade, l.letter || "А", l.subject));
+      }
+    });
+  }
 
-            } catch (e) {
-                console.error("Ошибка загрузки: ", e);
-                grid.innerHTML = '<p style="color:red; text-align:center; width:100%;">Ошибка подключения к базе данных.</p>';
-            }
+  function collectForm() {
+    const schedule = {};
+    DAYS.forEach(day => {
+      const block = document.querySelector('.day-block[data-day="' + day + '"]');
+      const lessons = [];
+      block.querySelectorAll(".lesson-row").forEach(r => {
+        const lessonNum = r.querySelector(".lesson-number-select").value;
+        const grade     = r.querySelector(".grade-select").value;
+        const letter    = r.querySelector(".letter-select").value;
+        const subject   = r.querySelector(".subject-select").value;
+        if (lessonNum && grade && letter && subject) {
+          lessons.push({
+            lessonNum: lessonNum,
+            grade: grade,
+            letter: letter,
+            subject: subject
+          });
         }
+      });
+      // сортируем уроки по номеру (1, 2, 3...)
+      lessons.sort((a, b) => Number(a.lessonNum) - Number(b.lessonNum));
+      schedule[day] = lessons;
+    });
+    return schedule;
+  }
 
-        function renderProducts() {
-            const grid = document.getElementById('goods-grid');
-            grid.innerHTML = '';
-            
-            if (products.length === 0) {
-                grid.innerHTML = '<p class="empty-message">Товаров пока нет. Зайдите в админ-панель, чтобы добавить их.</p>';
-                return;
-            }
+  function showView() {
+    const schedule = loadSchedule() || {};
+    scheduleView.innerHTML = "";
 
-            products.forEach((p, index) => {
-                grid.innerHTML += `
-                    <div class="card">
-                        <img src="${p.image}" alt="${p.name}" onclick="openModal('${p.image}', ${p.price}, '${p.name}')">
-                        <div class="price"><span class="price-value">${p.price}</span> ₽</div>
-                        <button class="add-btn" onclick="addToCart('Товар ${index + 1}: ${p.name}', ${p.price})">Добавить в корзину</button>
-                    </div>
-                `;
-            });
-        }
+    DAYS.forEach(day => {
+      const lessons = schedule[day] || [];
+      const card = document.createElement("div");
+      card.className = "schedule-card";
 
-        function openAuth() {
-            document.getElementById('auth-modal').classList.add('active');
-            document.getElementById('admin-password').value = '';
-        }
+      let listHTML = "";
+      if (lessons.length === 0) {
+        listHTML = '<li class="empty">(нет уроков)</li>';
+      } else {
+        listHTML = lessons.map(l =>
+          '<li><span class="lesson-label">' + escapeHtml(l.lessonNum) + ' урок:</span> ' +
+          escapeHtml(l.grade) + ' «' + escapeHtml(l.letter || "А") + '» — ' +
+          escapeHtml(l.subject) + '</li>'
+        ).join("");
+      }
+      card.innerHTML = "<h3>" + day + "</h3><ul>" + listHTML + "</ul>";
+      scheduleView.appendChild(card);
+    });
 
-        function closeAuth() {
-            document.getElementById('auth-modal').classList.remove('active');
-        }
+    shareLink.value = buildShareLink(schedule);
 
-        function checkPassword() {
-            const pass = document.getElementById('admin-password').value;
-            if (pass === ADMIN_PASSWORD) {
-                closeAuth();
-                openAdmin();
-            } else {
-                alert("Неверный пароль!");
-            }
-        }
+    viewScreen.classList.remove("hidden");
+    editScreen.classList.add("hidden");
+  }
 
-        function openAdmin() {
-            const panel = document.getElementById('admin-panel');
-            const list = document.getElementById('admin-products-list');
-            list.innerHTML = '';
-            newProducts = [];
-            deletedProducts = [];
-            newProductCounter = 0;
-            
-            products.forEach((p, index) => {
-                list.innerHTML += createProductEditHTML(p, index, false);
-            });
-            
-            panel.classList.add('active');
-        }
+  function showEdit() {
+    const schedule = loadSchedule();
+    fillForm(schedule);
+    viewScreen.classList.add("hidden");
+    editScreen.classList.remove("hidden");
+  }
 
-        function getProductNumber(index, isNew) {
-            let counter = 0;
-            for (let i = 0; i < products.length; i++) {
-                if (!deletedProducts.includes(products[i].id)) {
-                    if (i === index && !isNew) return counter + 1;
-                    counter++;
-                }
-            }
-            if (isNew) {
-                return counter + index + 1;
-            }
-            return counter;
-        }
+  document.getElementById("saveBtn").addEventListener("click", () => {
+    const data = collectForm();
+    try {
+      history.replaceState(null, "", HASH_PREFIX + encodeURIComponent(JSON.stringify(data)));
+    } catch(e) { console.warn("Не удалось обновить адрес:", e); }
+    showView();
+  });
 
-        function createProductEditHTML(product, index, isNew) {
-            const name = product.name || '';
-            const price = product.price || 0;
-            const image = product.image || '';
-            
-            const idx = isNew ? 'new-' + index : index;
-            const productNumber = getProductNumber(index, isNew);
-            const title = `Товар ${productNumber}`;
+  document.getElementById("editBtn").addEventListener("click", showEdit);
 
-            return `
-                <div class="product-edit" id="edit-block-${idx}">
-                    <h3>${title}</h3>
-                    <button class="delete-btn" onclick="handleDelete('${idx}')">Удалить</button>
-                    
-                    <label>Название:</label>
-                    <input type="text" id="admin-name-${idx}" value="${name}">
-                    
-                    <label>Цена (₽):</label>
-                    <input type="number" id="admin-price-${idx}" value="${price}">
-                    
-                    <label>Ссылка на фото (URL):</label>
-                    <div class="link-input-group">
-                        <input type="text" id="admin-image-${idx}" value="${image}" placeholder="Вставьте ссылку сюда...">
-                        <button class="open-site-btn" onclick="openUploadSite()">Загрузить фото</button>
-                    </div>
-                    <img src="${image}" id="admin-preview-${idx}" class="preview-img" alt="Превью" onerror="this.style.display='none'">
-                </div>
-            `;
-        }
+  document.getElementById("resetBtn").addEventListener("click", () => {
+    if (confirm("Точно удалить всё расписание?")) {
+      try { history.replaceState(null, "", location.pathname); } catch(e) {}
+      showEdit();
+    }
+  });
 
-        function handleDelete(idx) {
-            if (idx.startsWith('new-')) {
-                const newIndex = parseInt(idx.replace('new-', ''));
-                if (confirm("Удалить этот новый товар?")) {
-                    newProducts.splice(newIndex, 1);
-                    const block = document.getElementById('edit-block-' + idx);
-                    if (block) block.remove();
-                    redrawAllProducts();
-                }
-            } else {
-                const oldIndex = parseInt(idx);
-                const product = products[oldIndex];
-                if (confirm(`Удалить товар "${product.name}" из базы?`)) {
-                    deletedProducts.push(product.id);
-                    redrawAllProducts();
-                }
-            }
-        }
+  document.getElementById("copyBtn").addEventListener("click", () => {
+    shareLink.select();
+    shareLink.setSelectionRange(0, 99999);
+    try {
+      document.execCommand("copy");
+      alert("Ссылка скопирована ✓");
+    } catch(e) {
+      alert("Не получилось, скопируй вручную");
+    }
+  });
 
-        function redrawAllProducts() {
-            const list = document.getElementById('admin-products-list');
-            list.innerHTML = '';
-            
-            products.forEach((p, index) => {
-                if (!deletedProducts.includes(p.id)) {
-                    list.innerHTML += createProductEditHTML(p, index, false);
-                }
-            });
-
-            newProducts.forEach((p, index) => {
-                const div = document.createElement('div');
-                div.innerHTML = createProductEditHTML(p, index, true);
-                list.appendChild(div.firstElementChild);
-            });
-        }
-
-        function openUploadSite() {
-            window.open(UPLOAD_SITE_URL, '_blank');
-        }
-
-        function addNewProductRow() {
-            const newIndex = newProductCounter++;
-            const newProduct = { name: '', price: 0, image: '' };
-            newProducts.push(newProduct);
-            redrawAllProducts();
-        }
-
-        function closeAdmin() {
-            document.getElementById('admin-panel').classList.remove('active');
-        }
-
-        async function saveAdminChanges() {
-            if (!isFirebaseReady) return alert("Firebase еще не загружен!");
-            
-            const overlay = document.getElementById('loading-overlay');
-            const loadingText = document.getElementById('loading-text');
-            
-            overlay.classList.add('active');
-
-            try {
-                for (const id of deletedProducts) {
-                    loadingText.innerText = `Удаление товара...`;
-                    await window.firebaseDeleteDoc(window.firebaseDoc(window.firebaseDB, "products", id));
-                }
-
-                for (let index = 0; index < products.length; index++) {
-                    if (deletedProducts.includes(products[index].id)) continue;
-
-                    const p = products[index];
-                    const newName = document.getElementById('admin-name-' + index).value;
-                    const newPrice = parseInt(document.getElementById('admin-price-' + index).value) || 0;
-                    const newImage = document.getElementById('admin-image-' + index).value;
-
-                    loadingText.innerText = `Сохранение: ${newName}...`;
-                    await window.firebaseUpdateDoc(window.firebaseDoc(window.firebaseDB, "products", p.id), {
-                        name: newName,
-                        price: newPrice,
-                        image: newImage
-                    });
-                }
-
-                for (let i = 0; i < newProducts.length; i++) {
-                    const idx = 'new-' + i;
-                    const newName = document.getElementById('admin-name-' + idx).value;
-                    const newPrice = parseInt(document.getElementById('admin-price-' + idx).value) || 0;
-                    const newImage = document.getElementById('admin-image-' + idx).value || 'https://placehold.co/400x400/0a2e1f/e6d5a8?text=Фото';
-
-                    loadingText.innerText = `Добавление: ${newName}...`;
-                    await window.firebaseAddDoc(window.firebaseCollection(window.firebaseDB, "products"), {
-                        name: newName,
-                        price: newPrice,
-                        image: newImage,
-                        order: Date.now()
-                    });
-                }
-
-                await loadProductsFromFirebase();
-                closeAdmin();
-                alert("Все изменения успешно сохранены!");
-
-            } catch (e) {
-                console.error("Ошибка сохранения: ", e);
-                alert("Ошибка: " + e.message);
-            } finally {
-                overlay.classList.remove('active');
-            }
-        }
-
-        function toggleScrollLock(lock) {
-            document.body.style.overflow = lock ? 'hidden' : '';
-        }
-
-        function openModal(imageSrc, price, name) {
-            const modal = document.getElementById('modal');
-            document.getElementById('modal-image').src = imageSrc;
-            document.getElementById('modal-price').innerText = `${price} ₽`;
-            document.getElementById('modal-add-btn').onclick = function() { addToCart(name, price); closeModal(); };
-            modal.classList.add('active');
-            toggleScrollLock(true);
-        }
-
-        function closeModal() {
-            document.getElementById('modal').classList.remove('active');
-            toggleScrollLock(false);
-        }
-
-        function openCart() {
-            document.getElementById('cart-dropdown').classList.add('active');
-            toggleScrollLock(true);
-        }
-
-        function closeCart() {
-            document.getElementById('cart-dropdown').classList.remove('active');
-            toggleScrollLock(false);
-        }
-
-        function addToCart(name, price) {
-            // Проверяем, есть ли уже такой товар в корзине
-            const existingItem = cart.find(item => item.name === name);
-            if (existingItem) {
-                existingItem.quantity += 1;
-            } else {
-                cart.push({ name, price, quantity: 1 });
-            }
-            updateCart();
-        }
-
-        function updateCart() {
-            const cartContainer = document.getElementById('cart-items');
-            const totalContainer = document.getElementById('total-price');
-            const floatingCount = document.getElementById('floating-count');
-            cartContainer.innerHTML = '';
-            let total = 0;
-            let totalQuantity = 0;
-            
-            cart.forEach((item, index) => {
-                total += item.price * item.quantity;
-                totalQuantity += item.quantity;
-                cartContainer.innerHTML += `
-                    <div class="cart-item">
-                        <span>${item.name} (x${item.quantity})</span>
-                        <span>${item.price * item.quantity} ₽ 
-                            <button onclick="removeFromCart(${index})" style="background:red; color:white; border:none; border-radius:5px; cursor:pointer;">X</button>
-                        </span>
-                    </div>
-                `;
-            });
-            totalContainer.innerText = total;
-            floatingCount.innerText = totalQuantity;
-
-            const phone = "+79388955155";
-            let message = "Здравствуйте! Хочу оформить заказ в GULÌSTORY:%0A";
-            cart.forEach((item, index) => {
-                message += `${index + 1}. ${item.name} (x${item.quantity}) - ${item.price * item.quantity}₽%0A`;
-            });
-            message += `%0AИтого: ${total}₽`;
-            const link = document.getElementById('whatsapp-link');
-            link.href = `https://wa.me/${phone.replace('+', '')}?text=${message}`;
-        }
-
-        function removeFromCart(index) {
-            cart.splice(index, 1);
-            updateCart();
-        }
-    </script>
+  /* ---------- Запуск ---------- */
+  const saved = loadSchedule();
+  if (saved) showView();
+  else showEdit();
+</script>
 </body>
 </html>
