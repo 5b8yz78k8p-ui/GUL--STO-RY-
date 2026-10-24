@@ -71,9 +71,9 @@
         .admin-panel.active { display: flex; }
         .admin-content { background: rgba(10, 46, 31, 0.98); border: 2px solid #e6d5a8; border-radius: 16px; padding: 20px; max-width: 800px; width: 95%; position: relative; margin: 20px; }
         .admin-content h2 { color: #e6d5a8; text-align: center; margin-top: 0; border-bottom: 2px solid #e6d5a8; padding-bottom: 10px; }
-        .admin-close { position: absolute; top: 10px; right: 15px; background: #ff4d4d; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 16px; cursor: pointer;-top }
+        .admin-close { position: absolute; top: 10px; right: 15px; background: #ff4d4d; color: white; border: none; border-radius: 50%; width: 30px; height: 30px; font-size: 16px; cursor: pointer; }
         
-        .product-:edit { background: rgba(255,255 ,255,0.405); border: 1px solidpx rgba(230, 213, 168,  solid0.3); border-radius: 10px; padding: 15px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; position: relative; }
+        .product-edit { background: rgba(255,255,255,0.05); border: 1px solid rgba(230, 213, 168, 0.3); border-radius: 10px; padding: 15px; margin-bottom: 15px; display: flex; flex-direction: column; gap: 10px; position: relative; }
         .product-edit h3 { color: #e6d5a8; margin: 0; font-size: 1.1em; padding-right: 80px; }
         .product-edit label { font-size: 0.9em; color: #aaa; margin-bottom: -5px; }
         .product-edit input { padding: 8px; border-radius: 5px; border: 1px solid #e6d5a8; background: #0a2e1f; color: #fff; width: 100%; box-sizing: border-box; }
@@ -96,7 +96,7 @@
 
         .loading-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); display: none; justify-content: center; align-items: center; z-index: 4000; flex-direction: column; }
         .loading-overlay.active { display: flex; }
-        .spinner { border: 4px solid rgba(255,255,255,0.3); border #e6d5a8; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 15px; }
+        .spinner { border: 4px solid rgba(255,255,255,0.3); border-top: 4px solid #e6d5a8; border-radius: 50%; width: 40px; height: 40px; animation: spin 1s linear infinite; margin-bottom: 15px; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         .loading-text { color: #e6d5a8; font-size: 1.2em; text-align: center; padding: 0 20px; }
 
@@ -301,6 +301,7 @@
             panel.classList.add('active');
         }
 
+        // Считаем номер для отображения (учитывая удаленные)
         function getProductNumber(index, isNew) {
             let counter = 0;
             for (let i = 0; i < products.length; i++) {
@@ -320,55 +321,65 @@
             const price = product.price || 0;
             const image = product.image || '';
             
-            const idx = isNew ? 'new-' + index : index;
+            // Уникальный ID для каждого блока, чтобы кнопка удаления работала четко
+            const blockId = isNew ? 'new-' + index : 'old-' + index; 
             const productNumber = getProductNumber(index, isNew);
             const title = `Товар ${productNumber}`;
 
             return `
-                <div class="product-edit" id="edit-block-${idx}">
+                <div class="product-edit" id="edit-block-${blockId}">
                     <h3>${title}</h3>
-                    <button class="delete-btn" onclick="handleDelete('${idx}')">Удалить</button>
+                    <!-- Кнопка удаления привязана строго к этому блоку -->
+                    <button class="delete-btn" onclick="deleteProduct('${blockId}', ${isNew}, ${index})">Удалить</button>
                     
                     <label>Название:</label>
-                    <input type="text" id="admin-name-${idx}" value="${name}">
+                    <input type="text" id="admin-name-${blockId}" value="${name}">
                     
                     <label>Цена (₽):</label>
-                    <input type="number" id="admin-price-${idx}" value="${price}">
+                    <input type="number" id="admin-price-${blockId}" value="${price}">
                     
                     <label>Ссылка на фото (URL):</label>
                     <div class="link-input-group">
-                        <input type="text" id="admin-image-${idx}" value="${image}" placeholder="Вставьте ссылку сюда...">
+                        <input type="text" id="admin-image-${blockId}" value="${image}" placeholder="Вставьте ссылку сюда...">
                         <button class="open-site-btn" onclick="openUploadSite()">Загрузить фото</button>
                     </div>
-                    <img src="${image}" id="admin-preview-${idx}" class="preview-img" alt="Превью" onerror="this.style.display='none'">
+                    <img src="${image}" id="admin-preview-${blockId}" class="preview-img" alt="Превью" onerror="this.style.display='none'">
                 </div>
             `;
         }
 
-        function handleDelete(idx) {
-            if (idx.startsWith('new-')) {
-                const newIndex = parseInt(idx.replace('new-', ''));
+        // Четкая функция удаления
+        function deleteProduct(blockId, isNew, index) {
+            const block = document.getElementById('edit-block-' + blockId);
+            
+            if (isNew) {
                 if (confirm("Удалить этот новый товар?")) {
-                    newProducts.splice(newIndex, 1);
-                    const block = document.getElementById('edit-block-' + idx);
+                    // Удаляем из массива новых
+                    newProducts.splice(index, 1);
+                    // Удаляем блок из HTML
                     if (block) block.remove();
+                    // Перерисовываем ТОЛЬКО чтобы обновить номера
                     redrawAllProducts();
                 }
             } else {
-                const oldIndex = parseInt(idx);
-                const product = products[oldIndex];
-                if (confirm(`Удалить товар "${product.name}" из базы?`)) {
-                    deletedProducts.push(product.id);
+                if (confirm("Удалить этот товар из базы?")) {
+                    // Помечаем на удаление
+                    deletedProducts.push(products[index].id);
+                    // Скрываем блок
+                    if (block) block.style.display = 'none';
+                    // Перерисовываем, чтобы номера сдвинулись
                     redrawAllProducts();
                 }
             }
         }
 
+        // Перерисовка ТОЛЬКО для обновления номеров (сохраняет скрытие удаленных)
         function redrawAllProducts() {
             const list = document.getElementById('admin-products-list');
             list.innerHTML = '';
             
             products.forEach((p, index) => {
+                // Если товар не удален, отрисовываем
                 if (!deletedProducts.includes(p.id)) {
                     list.innerHTML += createProductEditHTML(p, index, false);
                 }
@@ -389,7 +400,12 @@
             const newIndex = newProductCounter++;
             const newProduct = { name: '', price: 0, image: '' };
             newProducts.push(newProduct);
-            redrawAllProducts();
+            
+            // Просто добавляем новый блок в конец
+            const list = document.getElementById('admin-products-list');
+            const div = document.createElement('div');
+            div.innerHTML = createProductEditHTML(newProduct, newIndex, true);
+            list.appendChild(div.firstElementChild);
         }
 
         function closeAdmin() {
@@ -405,18 +421,21 @@
             overlay.classList.add('active');
 
             try {
+                // 1. УДАЛЕНИЕ
                 for (const id of deletedProducts) {
                     loadingText.innerText = `Удаление товара...`;
                     await window.firebaseDeleteDoc(window.firebaseDoc(window.firebaseDB, "products", id));
                 }
 
+                // 2. ОБНОВЛЕНИЕ СТАРЫХ
                 for (let index = 0; index < products.length; index++) {
                     if (deletedProducts.includes(products[index].id)) continue;
 
                     const p = products[index];
-                    const newName = document.getElementById('admin-name-' + index).value;
-                    const newPrice = parseInt(document.getElementById('admin-price-' + index).value) || 0;
-                    const newImage = document.getElementById('admin-image-' + index).value;
+                    const blockId = 'old-' + index;
+                    const newName = document.getElementById('admin-name-' + blockId).value;
+                    const newPrice = parseInt(document.getElementById('admin-price-' + blockId).value) || 0;
+                    const newImage = document.getElementById('admin-image-' + blockId).value;
 
                     loadingText.innerText = `Сохранение: ${newName}...`;
                     await window.firebaseUpdateDoc(window.firebaseDoc(window.firebaseDB, "products", p.id), {
@@ -426,11 +445,12 @@
                     });
                 }
 
+                // 3. ДОБАВЛЕНИЕ НОВЫХ
                 for (let i = 0; i < newProducts.length; i++) {
-                    const idx = 'new-' + i;
-                    const newName = document.getElementById('admin-name-' + idx).value;
-                    const newPrice = parseInt(document.getElementById('admin-price-' + idx).value) || 0;
-                    const newImage = document.getElementById('admin-image-' + idx).value || 'https://placehold.co/400x400/0a2e1f/e6d5a8?text=Фото';
+                    const blockId = 'new-' + i;
+                    const newName = document.getElementById('admin-name-' + blockId).value;
+                    const newPrice = parseInt(document.getElementById('admin-price-' + blockId).value) || 0;
+                    const newImage = document.getElementById('admin-image-' + blockId).value || 'https://placehold.co/400x400/0a2e1f/e6d5a8?text=Фото';
 
                     loadingText.innerText = `Добавление: ${newName}...`;
                     await window.firebaseAddDoc(window.firebaseCollection(window.firebaseDB, "products"), {
